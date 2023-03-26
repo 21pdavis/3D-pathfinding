@@ -1,0 +1,1 @@
+Final project for my algorithms honors colloquium. Explores the differences between pathfinding algorithms in 3D space using Octrees
