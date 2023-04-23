@@ -4,7 +4,7 @@ using UnityEngine;
 public class Pathing : MonoBehaviour
 {
     /*
-     So here's what I want to do here. I want to make it so this script can find the octree node where it belongs.
+     So here's what I want to do here. I want to make it so this script can find the closest octree node to the object to which it is attached.
      To do that, I need to help it find the Octree GameObject
      */
 

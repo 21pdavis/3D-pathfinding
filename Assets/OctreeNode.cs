@@ -6,6 +6,8 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
+using static Functional;
+
 public class OctreeNode
 {
     Bounds nodeBounds;
@@ -87,8 +89,7 @@ public class OctreeNode
 
     public void Draw()
     {
-        Gizmos.color = containsPather ? Color.yellow : Color.green;
-        Gizmos.DrawWireCube(nodeBounds.center, nodeBounds.size);
+        DrawWireCubeWithColor(nodeBounds, containsPather ? Color.yellow : Color.green);
         if (children != null)
         {
             for (int i = 0; i < 8; i++)
@@ -108,6 +109,7 @@ public class OctreeNode
         {
             foreach (OctreeNode child in children)
             {
+                // shouldn't need to use Functional DrawLine here - just make sure to call DrawTraverse with Functional.DrawWithColor
                 Gizmos.DrawLine(nodeBounds.center, child.nodeBounds.center);
                 child?.DrawTraverse();
             }

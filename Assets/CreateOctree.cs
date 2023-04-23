@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using static Functional;
+
 [System.Serializable]
 public class CreateOctree : MonoBehaviour
 {
@@ -22,8 +24,12 @@ public class CreateOctree : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            Gizmos.color = Color.green;
-            octree.root.Draw();
+            DrawWithColor(octree.root.Draw, Color.green);
+
+            if (showSearch)
+            {
+                DrawWithColor(octree.root.DrawTraverse, Color.red);
+            }
 
             if (showColliders)
             {
@@ -31,13 +37,8 @@ public class CreateOctree : MonoBehaviour
                 foreach (GameObject obj in worldObjects)
                 {
                     Bounds objBounds = obj.GetComponent<Collider>().bounds;
-                    Gizmos.DrawWireCube(objBounds.center, objBounds.size);
+                    DrawWireCubeWithColor(objBounds, Color.red);
                 }
-            }
-
-            if (showSearch)
-            {
-                octree.root.DrawTraverse();
             }
         }
     }
