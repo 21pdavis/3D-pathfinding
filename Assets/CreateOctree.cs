@@ -6,7 +6,6 @@ using UnityEngine.UIElements;
 using static Functional;
 
 [System.Serializable]
-[RequireComponent(typeof(UIDocument))]
 public class CreateOctree : MonoBehaviour
 {
     public GameObject[] worldObjects;
@@ -22,23 +21,15 @@ public class CreateOctree : MonoBehaviour
         octree = new Octree(worldObjects, nodeMinSize);
     }
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log("Pressed Space!");
-        }
-    }
-
     void OnDrawGizmos()
     {
-        if (Application.isPlaying)
+        if (octree != null && octree.initialized)
         {
             DrawWithColor(octree.root.Draw, Color.green);
 
             if (showSearch)
             {
-                DrawWithColor(octree.root.DrawTraverse, Color.red);
+                DrawWithColor(() => { Algorithms.BFS(octree.root); }, Color.red);
             }
 
             if (showColliders)

@@ -1,9 +1,6 @@
-using Palmmedia.ReportGenerator.Core;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
+// TODO: Rename to SubdivGraph?
 public class Octree
 {
     public OctreeNode root;
@@ -35,6 +32,7 @@ public class Octree
 
     public void AddObjects(GameObject[] worldObjects)
     {
+        // we do a pass of subdivision for each object in the scene
         foreach (GameObject wo in worldObjects)
         {
             root.AddObject(wo);

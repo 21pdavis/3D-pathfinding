@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18049988, g: 0.22597331, b: 0.30704507, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -429,14 +429,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: -0.41549864, y: 0.3020574, z: -0.07724671, w: -0.8544912}
   m_LocalPosition: {x: 12.07, y: 14.3, z: -19.47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 49.178, y: -403.746, z: -10.488}
 --- !u!1 &795349840
 GameObject:
   m_ObjectHideFlags: 0
@@ -1095,6 +1095,7 @@ GameObject:
   - component: {fileID: 2030068492}
   - component: {fileID: 2030068491}
   - component: {fileID: 2030068493}
+  - component: {fileID: 2030068494}
   m_Layer: 0
   m_Name: Octree
   m_TagString: Tree
@@ -1152,3 +1153,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b30e408b1b7f3594882b5dc9a39dfb91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2030068494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030068490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 0}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 0}
+  m_SortingOrder: 0
