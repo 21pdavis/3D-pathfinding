@@ -1,27 +1,54 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 internal class Algorithms
 {
-    public static void BFS(OctreeNode root, bool draw=true)
+    // need to prevent from revisiting nodes
+    public static void BFS(OctreeNode root, Action<OctreeNode, OctreeNode> visitFunc)
     {
         Queue<OctreeNode> queue = new();
         queue.Enqueue(root);
+        HashSet<OctreeNode> visited = new();
 
-        OctreeNode prev = null;
         while (queue.Count > 0)
         {
-            prev = queue.Dequeue();
+            OctreeNode prev = queue.Dequeue();
 
-            foreach (OctreeNode node in prev.neighbors)
+            foreach (OctreeNode node in prev.children.Where(node => node != null))
             {
-                if (node != null)
-                {
-                    queue.Enqueue(node);
-                    if (draw) Gizmos.DrawLine(prev.nodeBounds.center, node.nodeBounds.center);
-                }
+                if (visited.Contains(node)) continue;
+                queue.Enqueue(node);
+                visitFunc(prev, node);
             }
+
+            visited.Add(prev);
         }
     }
 
+    public static void BFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode> visitFunc)
+    {
+        Queue<PathGraphNode> queue = new();
+        queue.Enqueue(root);
+        HashSet<PathGraphNode> visited = new();
+
+        int count = 0;
+        while (queue.Count > 0)
+        {
+            PathGraphNode prev = queue.Dequeue();
+            count++;
+
+            foreach (PathGraphNode node in prev.neighbors)
+            {
+                if (visited.Contains(node)) continue;
+                queue.Enqueue(node);
+                visitFunc(prev, node);
+            }
+
+            visited.Add(prev);
+        }
+
+        Debug.Log(count);
+    }
 }

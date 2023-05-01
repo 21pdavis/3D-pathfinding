@@ -9,13 +9,13 @@ public class Pathing : MonoBehaviour
      */
 
     private GameObject octreeGameObject;
-    private CreateOctree createOctreeScript;
+    private CreateGraph createOctreeScript;
     private Octree octree;
 
     private void Start()
     {
         octreeGameObject = GameObject.Find("Octree");
-        createOctreeScript = octreeGameObject.GetComponent<CreateOctree>();
+        createOctreeScript = octreeGameObject.GetComponent<CreateGraph>();
     }
 
     private void FixedUpdate()
