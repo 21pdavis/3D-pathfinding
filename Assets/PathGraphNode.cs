@@ -11,11 +11,12 @@ public class PathGraphNode
 
     public static PathGraphNode FromOctreeNode(OctreeNode node)
     {
-        PathGraphNode ret = new();
-
-        ret.neighbors = new List<PathGraphNode>();
-        ret.containsPather = false;
-        ret.bounds = new Bounds(node.bounds.center, node.bounds.size);
+        PathGraphNode ret = new()
+        {
+            neighbors = new List<PathGraphNode>(),
+            containsPather = false,
+            bounds = new Bounds(node.bounds.center, node.bounds.size)
+        };
 
         return ret;
     }

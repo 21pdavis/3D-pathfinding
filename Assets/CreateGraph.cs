@@ -29,14 +29,6 @@ public class CreateGraph : MonoBehaviour
 
         if (showSearch)
         {
-            //DrawWithColor(() =>
-            //{
-            //    Algorithms.BFS(octree.root, (OctreeNode prev, OctreeNode next) =>
-            //    {
-            //        Gizmos.DrawLine(prev.bounds.center, next.bounds.center);
-            //    });
-            //}, Color.red);
-
             DrawWithColor(() =>
             {
                 Algorithms.BFS(pathGraph.root, (PathGraphNode prev, PathGraphNode next) =>

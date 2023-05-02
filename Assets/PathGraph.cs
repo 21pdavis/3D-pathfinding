@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 public class PathGraph
 {
@@ -8,6 +9,12 @@ public class PathGraph
     // initialize PathGraph using a level-order traversal of the given octree
     public static PathGraph FromOctree(Octree octree)
     {
+        //PathGraph ret = new()
+        //{
+        //    root = octree.root.DeepClone(),
+        //    initialized = true
+        //};
+
         PathGraph ret = new();
 
         Queue<PathGraphNode> queue = new();
@@ -29,7 +36,9 @@ public class PathGraph
             }
 
             PathGraphNode newNode = PathGraphNode.FromOctreeNode(next);
-            queue.Enqueue(newNode);
+            //if (next.children.All(n => n != null))
+            if (next.hasNonNullChildren)
+                queue.Enqueue(newNode);
             prevPathGraphNode.neighbors.Add(newNode);
         });
 

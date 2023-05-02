@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 internal class Algorithms
@@ -33,11 +34,9 @@ internal class Algorithms
         queue.Enqueue(root);
         HashSet<PathGraphNode> visited = new();
 
-        int count = 0;
         while (queue.Count > 0)
         {
             PathGraphNode prev = queue.Dequeue();
-            count++;
 
             foreach (PathGraphNode node in prev.neighbors)
             {
@@ -48,7 +47,5 @@ internal class Algorithms
 
             visited.Add(prev);
         }
-
-        Debug.Log(count);
     }
 }
