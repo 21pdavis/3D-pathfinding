@@ -27,7 +27,7 @@ internal class Algorithms
         }
     }
 
-    public static void BFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode, int> visitFunc)
+    public static void BFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode, List<PathGraphNode>, int> visitFunc)
     {
         Queue<PathGraphNode> queue = new();
         queue.Enqueue(root);
@@ -42,7 +42,7 @@ internal class Algorithms
             for (int i = 0; i < notVisited.Count; i++)
             {
                 queue.Enqueue(notVisited[i]);
-                visitFunc(prev, notVisited[i], i);
+                visitFunc(prev, notVisited[i], notVisited, i);
             }
 
             visited.Add(prev);

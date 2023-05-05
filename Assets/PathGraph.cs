@@ -45,15 +45,18 @@ public class PathGraph
     public void ConnectGraph()
     {
         // connect parents
-        Algorithms.BFS(root, (prev, next, i) =>
+        Algorithms.BFS(root, (prev, next, i, len) =>
         {
             next.neighbors.Add(prev);
         });
 
-        // connect immediate siblings
-        Algorithms.BFS(root, (prev, next, i) =>
+        // connect immediate siblings (not sure if this will work - will it add repeats?)
+        Algorithms.BFS(root, (prev, next, notVisited, i) =>
         {
-
+            if (i < notVisited.Count - 1)
+            {
+                next.neighbors.Add(notVisited[i + 1]);
+            }
         });
     }
 }

@@ -23,7 +23,7 @@ public class PathGraphNode
 
     public void Draw()
     {
-        Algorithms.BFS(this, (prev, next, i) =>
+        Algorithms.BFS(this, (prev, next, i, len) =>
         {
             DrawWireCubeWithColor(next.bounds, next.containsPather ? Color.yellow : Color.green);
         });
