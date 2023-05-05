@@ -17,9 +17,8 @@ internal class Algorithms
         {
             OctreeNode prev = queue.Dequeue();
 
-            foreach (OctreeNode node in prev.children.Where(node => node != null))
+            foreach (OctreeNode node in prev.children.Where(node => node != null && !visited.Contains(node)))
             {
-                if (visited.Contains(node)) continue;
                 queue.Enqueue(node);
                 visitFunc(prev, node);
             }
@@ -28,7 +27,7 @@ internal class Algorithms
         }
     }
 
-    public static void BFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode> visitFunc)
+    public static void BFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode, int> visitFunc)
     {
         Queue<PathGraphNode> queue = new();
         queue.Enqueue(root);
@@ -38,11 +37,12 @@ internal class Algorithms
         {
             PathGraphNode prev = queue.Dequeue();
 
-            foreach (PathGraphNode node in prev.neighbors)
+            // index for 
+            List<PathGraphNode> notVisited = prev.neighbors.Where(node => !visited.Contains(node)).ToList();
+            for (int i = 0; i < notVisited.Count; i++)
             {
-                if (visited.Contains(node)) continue;
-                queue.Enqueue(node);
-                visitFunc(prev, node);
+                queue.Enqueue(notVisited[i]);
+                visitFunc(prev, notVisited[i], i);
             }
 
             visited.Add(prev);

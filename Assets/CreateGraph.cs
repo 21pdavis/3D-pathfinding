@@ -18,20 +18,20 @@ public class CreateGraph : MonoBehaviour
         // Question: How is worldObjects populated? A: in unity
         octree = new Octree(worldObjects, nodeMinSize);
         pathGraph = PathGraph.FromOctree(octree);
+        pathGraph.ConnectGraph();
     }
 
     private void OnDrawGizmos()
     {
-        if (!(octree != null && octree.initialized)) return;
+        if (!(octree != null && pathGraph.initialized)) return;
 
-        //DrawWithColor(octree.root.Draw, Color.green);
         DrawWithColor(pathGraph.root.Draw, Color.green);
 
         if (showSearch)
         {
             DrawWithColor(() =>
             {
-                Algorithms.BFS(pathGraph.root, (PathGraphNode prev, PathGraphNode next) =>
+                Algorithms.BFS(pathGraph.root, (PathGraphNode prev, PathGraphNode next, int i) =>
                 {
                     Gizmos.DrawLine(prev.bounds.center, next.bounds.center);
                 });

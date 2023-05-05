@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UIElements;
 using static Functional;
 
 public class PathGraphNode
@@ -23,11 +23,9 @@ public class PathGraphNode
 
     public void Draw()
     {
-        DrawWireCubeWithColor(bounds, containsPather ? Color.yellow : Color.green);
-
-        foreach (PathGraphNode node in neighbors)
+        Algorithms.BFS(this, (prev, next, i) =>
         {
-            node.Draw();
-        }
+            DrawWireCubeWithColor(next.bounds, next.containsPather ? Color.yellow : Color.green);
+        });
     }
 }

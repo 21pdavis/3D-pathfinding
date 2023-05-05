@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UIElements;
 
 public class PathGraph
 {
@@ -9,12 +10,6 @@ public class PathGraph
     // initialize PathGraph using a level-order traversal of the given octree
     public static PathGraph FromOctree(Octree octree)
     {
-        //PathGraph ret = new()
-        //{
-        //    root = octree.root.DeepClone(),
-        //    initialized = true
-        //};
-
         PathGraph ret = new();
 
         Queue<PathGraphNode> queue = new();
@@ -45,5 +40,20 @@ public class PathGraph
         ret.root = pathRoot;
         ret.initialized = true;
         return ret;
+    }
+
+    public void ConnectGraph()
+    {
+        // connect parents
+        Algorithms.BFS(root, (prev, next, i) =>
+        {
+            next.neighbors.Add(prev);
+        });
+
+        // connect immediate siblings
+        Algorithms.BFS(root, (prev, next, i) =>
+        {
+
+        });
     }
 }
