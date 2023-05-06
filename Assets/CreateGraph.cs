@@ -19,7 +19,13 @@ public class CreateGraph : MonoBehaviour
         // Question: How is worldObjects populated? A: in unity
         octree = new Octree(worldObjects, nodeMinSize);
         pathGraph = PathGraph.FromOctree(octree);
+        Debug.Log($"pathGraph nodeCount before connection is {pathGraph.nodeCount}");
+        Debug.Log($"pathGraph edgeCount before connection is {pathGraph.edgeCount}");
+
         pathGraph.ConnectGraph();
+
+        Debug.Log($"pathGraph nodeCount after connection is {pathGraph.nodeCount}");
+        Debug.Log($"pathGraph edgeCount after connection is {pathGraph.edgeCount}");
     }
 
     private void OnDrawGizmos()

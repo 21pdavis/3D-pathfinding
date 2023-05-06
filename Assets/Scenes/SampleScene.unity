@@ -902,7 +902,8 @@ MonoBehaviour:
   - {fileID: 45243251}
   - {fileID: 795349840}
   nodeMinSize: 1
-  showSearch: 1
+  showBoxes: 0
+  showSearch: 0
   showColliders: 0
 --- !u!4 &2030068492
 Transform:

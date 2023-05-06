@@ -33,19 +33,23 @@ internal class Algorithms
         queue.Enqueue(root);
         HashSet<PathGraphNode> visited = new();
 
+        int visitedCount = 0;
         while (queue.Count > 0)
         {
             PathGraphNode prev = queue.Dequeue();
 
-            // index for 
             List<PathGraphNode> notVisited = prev.neighbors.Where(node => !visited.Contains(node)).ToList();
             for (int i = 0; i < notVisited.Count; i++)
             {
+                visitedCount++;
                 queue.Enqueue(notVisited[i]);
                 visitFunc(prev, notVisited[i], notVisited, i);
             }
 
             visited.Add(prev);
         }
+
+        Debug.Log(visitedCount);
+        Debug.Log(visited.Count);
     }
 }

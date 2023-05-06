@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 using static Functional;
@@ -75,28 +74,6 @@ public class OctreeNode
             }
         }
 
-    }
-
-    // https://stackoverflow.com/questions/14536702/algorithm-to-clone-a-graph
-    private PathGraphNode DeepCloneImpl(Dictionary<OctreeNode, PathGraphNode> copies)
-    {
-        PathGraphNode copy = copies.GetValueOrDefault(this);
-        if (copy == null)
-        {
-            copy = PathGraphNode.FromOctreeNode(this);
-            copies.Add(this, copy);
-            foreach (OctreeNode child in children)
-            {
-                copy.neighbors.Add(PathGraphNode.FromOctreeNode(child));
-            }
-        }
-
-        return copy;
-    }
-
-    public PathGraphNode DeepClone()
-    {
-        return DeepCloneImpl(new Dictionary<OctreeNode, PathGraphNode>());
     }
 
     public void Draw()

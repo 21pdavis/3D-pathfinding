@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine.UIElements;
 
 public class PathGraph
 {
     public PathGraphNode root { private set; get; }
     public bool initialized { private set; get; }
+    public int nodeCount { private set; get; }
+    public int edgeCount { private set; get; }
 
     // initialize PathGraph using a level-order traversal of the given octree
     public static PathGraph FromOctree(Octree octree)
@@ -31,10 +31,11 @@ public class PathGraph
             }
 
             PathGraphNode newNode = PathGraphNode.FromOctreeNode(next);
-            //if (next.children.All(n => n != null))
             if (next.hasNonNullChildren)
                 queue.Enqueue(newNode);
             prevPathGraphNode.neighbors.Add(newNode);
+            ret.nodeCount++;
+            ret.edgeCount++;
         });
 
         ret.root = pathRoot;
@@ -45,18 +46,36 @@ public class PathGraph
     public void ConnectGraph()
     {
         // connect parents
-        Algorithms.BFS(root, (prev, next, i, len) =>
+        Algorithms.BFS(root, (prev, next, _, _) =>
         {
             next.neighbors.Add(prev);
+            edgeCount++;
         });
 
-        // connect immediate siblings (not sure if this will work - will it add repeats?)
+        Dictionary<PathGraphNode, List<PathGraphNode>> edgeBuffer = new();
         Algorithms.BFS(root, (prev, next, notVisited, i) =>
         {
+            edgeBuffer.Add(next, new List<PathGraphNode>());
+
             if (i < notVisited.Count - 1)
             {
-                next.neighbors.Add(notVisited[i + 1]);
+                edgeBuffer[next].Add(notVisited[i + 1]);
+            }
+
+            if (i > 0)
+            {
+                edgeBuffer[next].Add(notVisited[i - 1]);
             }
         });
+
+        // add buffered edges
+        foreach (KeyValuePair<PathGraphNode, List<PathGraphNode>> item in edgeBuffer)
+        {
+            foreach (PathGraphNode node in item.Value)
+            {
+                node.neighbors.Add(node);
+                edgeCount++;
+            }
+        }
     }
 }
