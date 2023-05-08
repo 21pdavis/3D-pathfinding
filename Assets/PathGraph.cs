@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using static Algorithms;
+
 public class PathGraph
 {
     public PathGraphNode root { private set; get; }
@@ -17,7 +19,7 @@ public class PathGraph
         OctreeNode pathPrev = null;
         PathGraphNode pathRoot = null;
 
-        Algorithms.BFS(octree.root, (prev, next) =>
+        BFS(octree.root, (prev, next) =>
         {
             if (pathPrev != prev)
             {
@@ -33,7 +35,8 @@ public class PathGraph
             PathGraphNode newNode = PathGraphNode.FromOctreeNode(next);
             if (next.hasNonNullChildren)
                 queue.Enqueue(newNode);
-            prevPathGraphNode.neighbors.Add(newNode);
+            //prevPathGraphNode.edges.Add(newNode);
+            prevPathGraphNode?.edges.Add(new Edge(newNode, Dist3D(prevPathGraphNode, newNode)));
             ret.nodeCount++;
             ret.edgeCount++;
         });
@@ -46,34 +49,42 @@ public class PathGraph
     public void ConnectGraph()
     {
         // connect parents
-        Algorithms.BFS(root, (prev, next, _, _) =>
+        BFS(root, (prev, next, _, _) =>
         {
-            next.neighbors.Add(prev);
+            //next.edges.Add(prev);
+            next.edges.Add(new Edge(prev, Dist3D(next, prev)));
             edgeCount++;
         });
 
-        Dictionary<PathGraphNode, List<PathGraphNode>> edgeBuffer = new();
-        Algorithms.BFS(root, (prev, next, notVisited, i) =>
+        Dictionary<PathGraphNode, List<Edge>> edgeBuffer = new();
+        BFS(root, (prev, next, notVisited, i) =>
         {
-            edgeBuffer.Add(next, new List<PathGraphNode>());
+            // we can assume this only happens once per node
+            edgeBuffer.Add(next, new List<Edge>());
 
             if (i < notVisited.Count - 1)
             {
-                edgeBuffer[next].Add(notVisited[i + 1]);
+                //edgeBuffer[next].Add(notVisited[i + 1]);
+                // "left" and "right" have little meaning in 3D space here, but this helps with intuition for the 2D representation of the graph
+                PathGraphNode rightSibling = notVisited[i + 1];
+                edgeBuffer[next].Add(new Edge(rightSibling, Dist3D(next, rightSibling)));
             }
 
             if (i > 0)
             {
-                edgeBuffer[next].Add(notVisited[i - 1]);
+                //edgeBuffer[next].Add(notVisited[i - 1]);
+                PathGraphNode leftSibling = notVisited[i - 1];
+                edgeBuffer[next].Add(new Edge(leftSibling, Dist3D(next, leftSibling)));
             }
         });
 
         // add buffered edges
-        foreach (KeyValuePair<PathGraphNode, List<PathGraphNode>> item in edgeBuffer)
+        foreach (KeyValuePair<PathGraphNode, List<Edge>> item in edgeBuffer)
         {
-            foreach (PathGraphNode node in item.Value)
+            foreach (Edge edge in item.Value)
             {
-                node.neighbors.Add(node);
+                //node.edges.Add(node);
+                item.Key.edges.Add(edge);
                 edgeCount++;
             }
         }

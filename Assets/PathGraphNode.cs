@@ -4,7 +4,7 @@ using static Functional;
 
 public class PathGraphNode
 {
-    public List<PathGraphNode> neighbors { set; get; }
+    public List<Edge> edges { set; get; }
     public bool containsPather;
     public Bounds bounds { private set; get; }
 
@@ -12,7 +12,7 @@ public class PathGraphNode
     {
         PathGraphNode ret = new()
         {
-            neighbors = new List<PathGraphNode>(),
+            edges = new List<Edge>(),
             containsPather = false,
             bounds = new Bounds(node.bounds.center, node.bounds.size)
         };
