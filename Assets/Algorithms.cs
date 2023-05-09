@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
+using Unity.VisualScripting.FullSerializer;
+using UnityEditor;
 using UnityEngine;
+
+using static Functional;
 
 internal class Algorithms
 {
@@ -46,6 +51,73 @@ internal class Algorithms
             }
 
             visited.Add(prev);
+        }
+    }
+
+    // Should I draw inside this algorithm or use a visitFunc? Probably safe to draw inside, but we'll see
+    // Use a priority queue for O(mlogn) runtime because m = O(mn)
+    // TODO: Make push-based?
+    public static void Dijkstra(PathGraph graph)
+    {
+        // initialize S and d
+        HashSet<PathGraphNode> explored = new() { graph.root };
+        Dictionary<PathGraphNode, double> dist = new() { { graph.root, 0 } };
+
+        // Priority Queue implemented with a quaternary heap (https://en.wikipedia.org/wiki/D-ary_heap), sourced from https://stackoverflow.com/a/73430119/12228952
+        /*
+         * Quaternary heap is a heap where each node has d=4 children. For a quaternary heap with n nodes, it is better for Dijkstra's because it has a practically more efficient
+         * time to decrease priority (O(dlog(n)) = O(log_4(n))), but a less efficient DeleteMin operation (O(dlog_d(n)) = O(log_4(n))). These bounds are actually the same asymptotically, though.
+         * It is more common in Dijkstra's to do decrease priority, which is why using this data structure makes sense.
+         */
+        // TODO: MAKE SURE TO CHECK FOR REPEATED CHECKS, DON'T WANT TO RE-SET A NODE'S DIST VALUE
+        PriorityQueue<(PathGraphNode from, PathGraphNode to), double> prio = new();
+
+        foreach (Edge edge in graph.root.edges)
+        {
+            // enqueue with weight across cut (S, V - S)
+            prio.Enqueue((graph.root, edge.node), edge.weight);
+        }
+
+        // TODO: Maybe fix BFS not properly visiting node
+        // Get set of all nodes Swe
+        HashSet<PathGraphNode> allNodes = new() { graph.root };
+        BFS(graph.root, (prev, next, _, _) =>
+        {
+            allNodes.Add(next);
+        });
+
+        int repeatCount = 0;
+        // Not positive that this condition works
+        while (explored.Count < graph.nodeCount)
+        {
+            // Select a node v not in S with at least one edge from S for which d'(v) = min_{e=(u,v):u in S}(dist[u] + e.weight) is as small as possible
+            double distanceAcrossCut = prio.PriorityPeek();
+            (PathGraphNode from, PathGraphNode to) next = prio.Dequeue();
+            // checking to see how redundant this is...
+            if (explored.Contains(next.to))
+            {
+                repeatCount++;
+                continue;
+            }
+
+            /*
+             * Visit Steps:
+             * 1. Add all nodes to which next has an edge to prio queue
+             * 2. Set dist[next.to] = dist[next.from] + distanceAcrossCut
+             * 3. Add next.to to explored
+             */
+
+            foreach (Edge edge in next.to.edges)
+            {
+                prio.Enqueue((next.to, edge.node), edge.weight);
+            }
+
+            dist[next.to] = dist[next.from] + distanceAcrossCut;
+
+            // distance is set, this is shortest path, so draw line
+            DrawLineWithColor(next.from.bounds.center, next.to.bounds.center, Color.yellow);
+
+            explored.Add(next.to);
         }
     }
 

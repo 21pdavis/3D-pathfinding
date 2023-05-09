@@ -6,7 +6,7 @@ public class PathGraph
 {
     public PathGraphNode root { private set; get; }
     public bool initialized { private set; get; }
-    public int nodeCount { private set; get; }
+    public int nodeCount { private set; get; } = 1; // in the current version of the graph, this number should come out to 1337
     public int edgeCount { private set; get; }
 
     // initialize PathGraph using a level-order traversal of the given octree

@@ -1,6 +1,7 @@
 using UnityEngine;
 
 using static Functional;
+using static Algorithms;
 
 [System.Serializable]
 public class CreateGraph : MonoBehaviour
@@ -10,7 +11,8 @@ public class CreateGraph : MonoBehaviour
     public Octree octree;
     public PathGraph pathGraph;
     public bool showBoxes;
-    public bool showSearch;
+    public bool showBFS;
+    public bool showDijkstra;
     public bool showColliders;
 
     // Start is called before the first frame update
@@ -31,15 +33,20 @@ public class CreateGraph : MonoBehaviour
             DrawWithColor(pathGraph.root.Draw, Color.green);
         }
 
-        if (showSearch)
+        if (showBFS)
         {
             DrawWithColor(() =>
             {
-                Algorithms.BFS(pathGraph.root, (prev, next, i, len) =>
+                BFS(pathGraph.root, (prev, next, i, len) =>
                 {
                     Gizmos.DrawLine(prev.bounds.center, next.bounds.center);
                 });
             }, Color.red);
+        }
+
+        if (showDijkstra)
+        {
+            Dijkstra(pathGraph);
         }
 
         if (showColliders)

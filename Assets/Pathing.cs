@@ -14,7 +14,7 @@ public class Pathing : MonoBehaviour
 
     private void Start()
     {
-        octreeGameObject = GameObject.Find("Octree");
+        octreeGameObject = GameObject.Find("PathGraph");
         createOctreeScript = octreeGameObject.GetComponent<CreateGraph>();
     }
 

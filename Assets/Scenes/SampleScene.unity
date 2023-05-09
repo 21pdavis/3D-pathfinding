@@ -877,7 +877,7 @@ GameObject:
   - component: {fileID: 2030068493}
   - component: {fileID: 2030068494}
   m_Layer: 0
-  m_Name: Octree
+  m_Name: PathGraph
   m_TagString: Tree
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -903,7 +903,8 @@ MonoBehaviour:
   - {fileID: 795349840}
   nodeMinSize: 1
   showBoxes: 0
-  showSearch: 0
+  showBFS: 0
+  showDijkstra: 0
   showColliders: 0
 --- !u!4 &2030068492
 Transform:
