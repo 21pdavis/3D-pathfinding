@@ -1,11 +1,15 @@
-﻿public class Edge
+﻿using System.Collections.Generic;
+
+public class Edge
 {
-    public PathGraphNode node { private set; get; }
+    public PathGraphNode from { private set; get; }
+    public PathGraphNode to { private set; get; }
     public double weight{ private set; get; }
 
-    public Edge(PathGraphNode node, double weight)
+    public Edge(PathGraphNode from, PathGraphNode to, double weight)
     {
-        this.node = node;
+        this.from = from;
+        this.to = to;
         this.weight = weight;
     }
 }

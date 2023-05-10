@@ -33,7 +33,7 @@ public class OctreeNode
         childBounds = new Bounds[8];
 
         // Bounds constructor takes in Vector3 center and Vector3 size
-        // Just defining the boundaries of where these nodes could possibly be, *not* creating them yet
+        // Just defining the boundaries of where these nodeSet could possibly be, *not* creating them yet
         // TODO: Make this prettier?
         childBounds[0] = new Bounds(bounds.center + new Vector3(-quarter, -quarter, -quarter), childSize);
         childBounds[1] = new Bounds(bounds.center + new Vector3(-quarter, -quarter, quarter), childSize);

@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.UIElements;
 using static Functional;
 using static Algorithms;
 
@@ -13,6 +13,7 @@ public class CreateGraph : MonoBehaviour
     public bool showBoxes;
     public bool showBFS;
     public bool showDijkstra;
+    public bool showBellmanFordMoore;
     public bool showColliders;
 
     // Start is called before the first frame update
@@ -47,6 +48,11 @@ public class CreateGraph : MonoBehaviour
         if (showDijkstra)
         {
             Dijkstra(pathGraph);
+        }
+
+        if (showBellmanFordMoore)
+        {
+            BellmanFordMoore(pathGraph);
         }
 
         if (showColliders)

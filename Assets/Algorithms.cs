@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
+using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEditor;
 using UnityEngine;
@@ -10,7 +11,7 @@ using static Functional;
 
 internal class Algorithms
 {
-    // need to prevent from revisiting nodes
+    // need to prevent from revisiting nodeSet
     public static void BFS(OctreeNode root, Action<OctreeNode, OctreeNode> visitFunc)
     {
         Queue<OctreeNode> queue = new();
@@ -42,7 +43,7 @@ internal class Algorithms
         {
             PathGraphNode prev = queue.Dequeue();
 
-            List<PathGraphNode> notVisited = prev.edges.Where(edge => !visited.Contains(edge.node)).Select(e => e.node).ToList();
+            List<PathGraphNode> notVisited = prev.edges.Where(edge => !visited.Contains(edge.to)).Select(e => e.to).ToList();
             for (int i = 0; i < notVisited.Count; i++)
             {
                 visitedCount++;
@@ -56,45 +57,41 @@ internal class Algorithms
 
     // Should I draw inside this algorithm or use a visitFunc? Probably safe to draw inside, but we'll see
     // Use a priority queue for O(mlogn) runtime because m = O(mn)
-    // TODO: Make push-based?
-    public static void Dijkstra(PathGraph graph)
+    public static void Dijkstra(PathGraph graph, PathGraphNode source=null)
     {
+        // if no source specified, set to root
+        source ??= graph.root;
+
         // initialize S and d
-        HashSet<PathGraphNode> explored = new() { graph.root };
-        Dictionary<PathGraphNode, double> dist = new() { { graph.root, 0 } };
+        HashSet<PathGraphNode> explored = new() { source };
+        Dictionary<PathGraphNode, double> dist = new() { { source, 0 } };
 
         // Priority Queue implemented with a quaternary heap (https://en.wikipedia.org/wiki/D-ary_heap), sourced from https://stackoverflow.com/a/73430119/12228952
         /*
-         * Quaternary heap is a heap where each node has d=4 children. For a quaternary heap with n nodes, it is better for Dijkstra's because it has a practically more efficient
+         * Quaternary heap is a heap where each to has d=4 children. For a quaternary heap with n nodeSet, it is better for Dijkstra's because it has a practically more efficient
          * time to decrease priority (O(dlog(n)) = O(log_4(n))), but a less efficient DeleteMin operation (O(dlog_d(n)) = O(log_4(n))). These bounds are actually the same asymptotically, though.
          * It is more common in Dijkstra's to do decrease priority, which is why using this data structure makes sense.
          */
         // TODO: MAKE SURE TO CHECK FOR REPEATED CHECKS, DON'T WANT TO RE-SET A NODE'S DIST VALUE
-        PriorityQueue<(PathGraphNode from, PathGraphNode to), double> prio = new();
+        PriorityQueue<Edge, double> prio = new();
 
-        foreach (Edge edge in graph.root.edges)
+        foreach (Edge edge in source.edges)
         {
             // enqueue with weight across cut (S, V - S)
-            prio.Enqueue((graph.root, edge.node), edge.weight);
+            prio.Enqueue(edge, edge.weight);
         }
-
-        // TODO: Maybe fix BFS not properly visiting node
-        // Get set of all nodes Swe
-        HashSet<PathGraphNode> allNodes = new() { graph.root };
-        BFS(graph.root, (prev, next, _, _) =>
-        {
-            allNodes.Add(next);
-        });
 
         int repeatCount = 0;
         // Not positive that this condition works
         while (explored.Count < graph.nodeCount)
         {
-            // Select a node v not in S with at least one edge from S for which d'(v) = min_{e=(u,v):u in S}(dist[u] + e.weight) is as small as possible
+            // Select a to v not in S with at least one edge from S for which d'(v) = min_{e=(u,v):u in S}(dist[u] + e.weight) is as small as possible
             double distanceAcrossCut = prio.PriorityPeek();
-            (PathGraphNode from, PathGraphNode to) next = prio.Dequeue();
+            Edge nextEdge = prio.Dequeue();
+
             // checking to see how redundant this is...
-            if (explored.Contains(next.to))
+            // The answer was fairly redundant, repeatCount came out to be ~3000, which is honestly less than I expected, though still not great
+            if (explored.Contains(nextEdge.to))
             {
                 repeatCount++;
                 continue;
@@ -102,30 +99,71 @@ internal class Algorithms
 
             /*
              * Visit Steps:
-             * 1. Add all nodes to which next has an edge to prio queue
+             * 1. Add all nodeSet to which next has an edge to prio queue
              * 2. Set dist[next.to] = dist[next.from] + distanceAcrossCut
              * 3. Add next.to to explored
              */
 
-            foreach (Edge edge in next.to.edges)
+            foreach (Edge edge in nextEdge.to.edges)
             {
-                prio.Enqueue((next.to, edge.node), edge.weight);
+                prio.Enqueue(edge, edge.weight);
             }
 
-            dist[next.to] = dist[next.from] + distanceAcrossCut;
+            dist[nextEdge.to] = dist[nextEdge.from] + distanceAcrossCut;
 
             // distance is set, this is shortest path, so draw line
-            DrawLineWithColor(next.from.bounds.center, next.to.bounds.center, Color.yellow);
+            DrawLineWithColor(nextEdge.from.bounds.center, nextEdge.to.bounds.center, Color.yellow);
 
-            explored.Add(next.to);
+            explored.Add(nextEdge.to);
         }
     }
 
     /// <summary>
-    /// returns the distance between the center points of two given nodes
+    /// DP algorithm to compute shortest paths. Slightly different to algorithm presented in textbook,
+    /// modified to be single source all destination instead of single sink
     /// </summary>
-    /// <param name="n1">The first node</param>
-    /// <param name="n2">The second node</param>
+    /// <param name="graph"></param>
+    /// TODO: Can probably optimize this to track cutset better...? Track In-Degree?
+    public static void BellmanFordMoore(PathGraph graph, PathGraphNode source=null)
+    {
+        // if no source specified, set to root
+        source ??= graph.root;
+
+        // get set of all nodeSet to which we assign distances from source
+        Dictionary<PathGraphNode, double> dist = new();
+        Dictionary<PathGraphNode, PathGraphNode> pred = new() { { source, null } };
+
+        foreach (PathGraphNode node in graph.nodeSet)
+        {
+            dist.Add(node, int.MaxValue);
+        }
+
+        dist[source] = 0;
+
+        // edge relaxation
+        for (int i = 0; i < dist.Count - 1; i++)
+        {
+            foreach (Edge edge in graph.edgeSet)
+            {
+                if (dist[edge.from] + edge.weight < dist[edge.to])
+                {
+                    dist[edge.to] = dist[edge.from] + edge.weight;
+                    pred[edge.to] = edge.from;
+                    DrawLineWithColor(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
+                }
+            }
+
+        }
+
+        //ensure all distances set
+        //Debug.Log($"{dist.Values.Count(v => v < int.MaxValue)} distance values set, should be {dist.Count}");
+    }
+
+    /// <summary>
+    /// returns the distance between the center points of two given nodeSet
+    /// </summary>
+    /// <param name="n1">The first to</param>
+    /// <param name="n2">The second to</param>
     /// <returns></returns>
     public static double Dist3D(PathGraphNode n1, PathGraphNode n2)
     {

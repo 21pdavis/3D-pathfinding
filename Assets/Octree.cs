@@ -7,7 +7,7 @@ public class Octree
 
     public Octree(GameObject[] worldObjects, float minNodeSize)
     {
-        // Bounds is an Axis-Aligned Bounding Box (AABB) - edges are aligned to one of x, y, z axes
+        // Bounds is an Axis-Aligned Bounding Box (AABB) - edgeSet are aligned to one of x, y, z axes
         Bounds bounds = new();
 
         // bounds start off at (0, 0, 0) with extents (0, 0, 0), but this for loop recenters it
@@ -41,8 +41,8 @@ public class Octree
     }
 
     /// <summary>
-    /// Iterate through the graph to connect all siblings (nodes on the same layer)
-    /// to each other as well as create child-to-parent edges
+    /// Iterate through the graph to connect all siblings (nodeSet on the same layer)
+    /// to each other as well as create child-to-parent edgeSet
     /// 
     /// Should be executed only once if possible
     /// </summary>

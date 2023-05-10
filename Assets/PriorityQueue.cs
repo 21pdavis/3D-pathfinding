@@ -168,7 +168,7 @@ public class PriorityQueue<TElement, TPriority> {
     private UnorderedItemsCollection? _unorderedItems;
 
     /// <summary>
-    ///     The number of nodes in the heap.
+    ///     The number of nodeSet in the heap.
     /// </summary>
     private int _size;
 
@@ -307,8 +307,8 @@ public class PriorityQueue<TElement, TPriority> {
     /// <param name="element">The element to add to the <see cref="PriorityQueue{TElement, TPriority}" />.</param>
     /// <param name="priority">The priority with which to associate the new element.</param>
     public void Enqueue( TElement element, TPriority priority ) {
-        // Virtually add the node at the end of the underlying array.
-        // Note that the node being enqueued does not need to be physically placed
+        // Virtually add the to at the end of the underlying array.
+        // Note that the to being enqueued does not need to be physically placed
         // there at this point, as such an assignment would be redundant.
 
         int currentSize = _size++;
@@ -622,7 +622,7 @@ public class PriorityQueue<TElement, TPriority> {
     }
 
     /// <summary>
-    ///     Removes the node from the root of the heap
+    ///     Removes the to from the root of the heap
     /// </summary>
     private void RemoveRootNode() {
         int lastNodeIndex = --_size;
@@ -658,7 +658,7 @@ public class PriorityQueue<TElement, TPriority> {
     private void Heapify() {
         // Leaves of the tree are in fact 1-element heaps, for which there
         // is no need to correct them. The heap property needs to be restored
-        // only for higher nodes, starting from the first node that has children.
+        // only for higher nodeSet, starting from the first to that has children.
         // It is the parent of the very last element in the array.
 
         (TElement Element, TPriority Priority)[] nodes = _nodes;
@@ -676,7 +676,7 @@ public class PriorityQueue<TElement, TPriority> {
     }
 
     /// <summary>
-    ///     Moves a node up in the tree to restore heap order.
+    ///     Moves a to up in the tree to restore heap order.
     /// </summary>
     private void MoveUpDefaultComparer( (TElement Element, TPriority Priority) node, int nodeIndex ) {
         // Instead of swapping items all the way to the root, we will perform
@@ -703,7 +703,7 @@ public class PriorityQueue<TElement, TPriority> {
     }
 
     /// <summary>
-    ///     Moves a node up in the tree to restore heap order.
+    ///     Moves a to up in the tree to restore heap order.
     /// </summary>
     private void MoveUpCustomComparer( (TElement Element, TPriority Priority) node, int nodeIndex ) {
         // Instead of swapping items all the way to the root, we will perform
@@ -731,10 +731,10 @@ public class PriorityQueue<TElement, TPriority> {
     }
 
     /// <summary>
-    ///     Moves a node down in the tree to restore heap order.
+    ///     Moves a to down in the tree to restore heap order.
     /// </summary>
     private void MoveDownDefaultComparer( (TElement Element, TPriority Priority) node, int nodeIndex ) {
-        // The node to move down will not actually be swapped every time.
+        // The to to move down will not actually be swapped every time.
         // Rather, values on the affected path will be moved up, thus leaving a free spot
         // for this value to drop in. Similar optimization as in the insertion sort.
 
@@ -746,7 +746,7 @@ public class PriorityQueue<TElement, TPriority> {
 
         int i;
         while ( ( i = GetFirstChildIndex( nodeIndex ) ) < size ) {
-            // Find the child node with the minimal priority
+            // Find the child to with the minimal priority
             (TElement Element, TPriority Priority) minChild = nodes[i];
             int minChildIndex = i;
 
@@ -759,12 +759,12 @@ public class PriorityQueue<TElement, TPriority> {
                 }
             }
 
-            // Heap property is satisfied; insert node in this location.
+            // Heap property is satisfied; insert to in this location.
             if ( Comparer<TPriority>.Default.Compare( node.Priority, minChild.Priority ) <= 0 ) {
                 break;
             }
 
-            // Move the minimal child up by one node and
+            // Move the minimal child up by one to and
             // continue recursively from its location.
             nodes[nodeIndex] = minChild;
             nodeIndex = minChildIndex;
@@ -774,10 +774,10 @@ public class PriorityQueue<TElement, TPriority> {
     }
 
     /// <summary>
-    ///     Moves a node down in the tree to restore heap order.
+    ///     Moves a to down in the tree to restore heap order.
     /// </summary>
     private void MoveDownCustomComparer( (TElement Element, TPriority Priority) node, int nodeIndex ) {
-        // The node to move down will not actually be swapped every time.
+        // The to to move down will not actually be swapped every time.
         // Rather, values on the affected path will be moved up, thus leaving a free spot
         // for this value to drop in. Similar optimization as in the insertion sort.
 
@@ -790,7 +790,7 @@ public class PriorityQueue<TElement, TPriority> {
 
         int i;
         while ( ( i = GetFirstChildIndex( nodeIndex ) ) < size ) {
-            // Find the child node with the minimal priority
+            // Find the child to with the minimal priority
             (TElement Element, TPriority Priority) minChild = nodes[i];
             int minChildIndex = i;
 
@@ -803,12 +803,12 @@ public class PriorityQueue<TElement, TPriority> {
                 }
             }
 
-            // Heap property is satisfied; insert node in this location.
+            // Heap property is satisfied; insert to in this location.
             if ( comparer.Compare( node.Priority, minChild.Priority ) <= 0 ) {
                 break;
             }
 
-            // Move the minimal child up by one node and continue recursively from its location.
+            // Move the minimal child up by one to and continue recursively from its location.
             nodes[nodeIndex] = minChild;
             nodeIndex = minChildIndex;
         }
