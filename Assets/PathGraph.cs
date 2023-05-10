@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Unity.VisualScripting;
+
 using static Algorithms;
 
 public class PathGraph
@@ -102,6 +102,7 @@ public class PathGraph
             foreach (Edge edge in item.Value)
             {
                 item.Key.edges.Add(edge);
+                edgeSet.Add(edge);
                 edgeCount++;
             }
         }

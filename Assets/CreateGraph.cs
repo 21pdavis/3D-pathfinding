@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static Functional;
 using static Algorithms;
 
@@ -14,6 +14,7 @@ public class CreateGraph : MonoBehaviour
     public bool showBFS;
     public bool showDijkstra;
     public bool showBellmanFordMoore;
+    public bool showOptimizedBellmanFordMoore;
     public bool showColliders;
 
     // Start is called before the first frame update
@@ -50,9 +51,17 @@ public class CreateGraph : MonoBehaviour
             Dijkstra(pathGraph);
         }
 
+
+        Dictionary<PathGraphNode, double> distUnoptimized = null;
+        Dictionary<PathGraphNode, double> distOptimized = null;
         if (showBellmanFordMoore)
         {
-            BellmanFordMoore(pathGraph);
+            distUnoptimized = BellmanFordMoore(pathGraph);
+        }
+
+        if (showOptimizedBellmanFordMoore)
+        {
+            distOptimized = OptimizedBellmanFordMoore(pathGraph);
         }
 
         if (showColliders)

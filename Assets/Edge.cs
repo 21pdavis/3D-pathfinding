@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-public class Edge
+﻿public class Edge
 {
     public PathGraphNode from { private set; get; }
     public PathGraphNode to { private set; get; }

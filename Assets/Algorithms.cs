@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design.Serialization;
 using System.Linq;
-using Unity.VisualScripting;
-using Unity.VisualScripting.FullSerializer;
-using UnityEditor;
 using UnityEngine;
 
 using static Functional;
@@ -66,8 +62,9 @@ internal class Algorithms
         HashSet<PathGraphNode> explored = new() { source };
         Dictionary<PathGraphNode, double> dist = new() { { source, 0 } };
 
-        // Priority Queue implemented with a quaternary heap (https://en.wikipedia.org/wiki/D-ary_heap), sourced from https://stackoverflow.com/a/73430119/12228952
         /*
+         * Priority Queue implemented with a quaternary heap (https://en.wikipedia.org/wiki/D-ary_heap), sourced from https://stackoverflow.com/a/73430119/12228952
+         *
          * Quaternary heap is a heap where each to has d=4 children. For a quaternary heap with n nodeSet, it is better for Dijkstra's because it has a practically more efficient
          * time to decrease priority (O(dlog(n)) = O(log_4(n))), but a less efficient DeleteMin operation (O(dlog_d(n)) = O(log_4(n))). These bounds are actually the same asymptotically, though.
          * It is more common in Dijkstra's to do decrease priority, which is why using this data structure makes sense.
@@ -124,7 +121,7 @@ internal class Algorithms
     /// </summary>
     /// <param name="graph"></param>
     /// TODO: Can probably optimize this to track cutset better...? Track In-Degree?
-    public static void BellmanFordMoore(PathGraph graph, PathGraphNode source=null)
+    public static Dictionary<PathGraphNode, double> BellmanFordMoore(PathGraph graph, PathGraphNode source=null)
     {
         // if no source specified, set to root
         source ??= graph.root;
@@ -141,6 +138,8 @@ internal class Algorithms
         dist[source] = 0;
 
         // edge relaxation
+        // Interesting observation: BellmanFord grows outwardly closer to how BFS works *because of the order of the edge set*,
+        // but Dijkstra's is more unpredictable. It is not necessarily like DFS, but it will just grab the next closest edge
         for (int i = 0; i < dist.Count - 1; i++)
         {
             foreach (Edge edge in graph.edgeSet)
@@ -152,11 +151,101 @@ internal class Algorithms
                     DrawLineWithColor(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
                 }
             }
-
         }
 
-        //ensure all distances set
-        //Debug.Log($"{dist.Values.Count(v => v < int.MaxValue)} distance values set, should be {dist.Count}");
+        // observation: edgeSet.Count = 4*(nodeSet.Count - 1), not sure if that's noteworthy 
+        Debug.Log($"dist.Count is {dist.Count}");
+
+        return dist;
+    }
+
+    /// <summary>
+    /// Two related optimizations made in this implementation:
+    /// 1. Tracking which nodes are updated at each step
+    /// 2. Breaking out early if no nodes were updated in the last step
+    /// The second can only be done because we are doing the first, so it has somewhat of a compounding positive effect on the run time
+    /// </summary>
+    /// <param name="graph"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    public static Dictionary<PathGraphNode, double> OptimizedBellmanFordMoore(PathGraph graph, PathGraphNode source = null)
+    {
+        // if no source specified, set to root
+        source ??= graph.root;
+
+        // get set of all nodeSet to which we assign distances from source
+        Dictionary<PathGraphNode, double> dist = new();
+        Dictionary<PathGraphNode, PathGraphNode> pred = new() { { source, null } };
+
+        foreach (PathGraphNode node in graph.nodeSet)
+        {
+            dist.Add(node, int.MaxValue);
+        }
+
+        dist[source] = 0;
+
+        // Q: Why was the original BF running slowly?
+        // A: Because we were checking every single edge at every execution. A better way is to track a cutset of edges that go across the cut
+        HashSet<Edge> edgesFromUpdatedNodes = new();
+
+        // start with edges out of node - these are the only edges that will be updated in the first iteration
+        foreach (Edge edge in source.edges)
+        {
+            edgesFromUpdatedNodes.Add(edge);
+        }
+
+        int updatedCountMax = int.MinValue;
+        int updatedCountSum = 0;
+        int numberOfIterations = 0;
+        // All the same as unoptimized up until this point
+        for (int i = 0; i < dist.Count - 1; i++)
+        {
+            numberOfIterations = i;
+            if (edgesFromUpdatedNodes.Count == 0)
+            {
+                Debug.Log($"Optimized Bellman-Ford broke early at iteration {i}");
+                break;
+            }
+
+            updatedCountSum += edgesFromUpdatedNodes.Count;
+            if (edgesFromUpdatedNodes.Count > updatedCountMax)
+            {
+                updatedCountMax = edgesFromUpdatedNodes.Count;
+            }
+
+            HashSet<PathGraphNode> updatedNodes = new();
+            // here's where it starts to be a little different - we update cutSet progressively
+            foreach (Edge edge in edgesFromUpdatedNodes)
+            {
+                if (dist[edge.from] + edge.weight < dist[edge.to])
+                {
+                    dist[edge.to] = dist[edge.from] + edge.weight;
+                    pred[edge.to] = edge.from;
+                    DrawLineWithColor(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
+
+                    updatedNodes.Add(edge.to);
+                }
+            }
+
+            // Is this actually O(mn)?
+            foreach (PathGraphNode updatedNode in updatedNodes)
+            {
+                foreach (Edge edgeFromUpdatedNode in updatedNode.edges) 
+                {
+                    edgesFromUpdatedNodes.Add(edgeFromUpdatedNode);
+                }
+            }
+
+            edgesFromUpdatedNodes = edgesFromUpdatedNodes.Where(e => updatedNodes.Contains(e.from)).ToHashSet();
+        }
+
+        Debug.Log($"Bellman-Ford Finished after {numberOfIterations} iterations");
+
+        int updatedSumFlooredAverage = updatedCountSum / numberOfIterations;
+        Debug.Log($"Average number of nodes checked per iteration was {updatedSumFlooredAverage}, which is an improvement over {graph.edgeCount}");
+        Debug.Log($"Maximum number of nodes checked in some iteration was {updatedCountMax}, which is an improvement over {graph.edgeCount}");
+
+        return dist;
     }
 
     /// <summary>
