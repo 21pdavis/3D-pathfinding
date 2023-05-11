@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -53,7 +54,7 @@ internal class Algorithms
 
     // Should I draw inside this algorithm or use a visitFunc? Probably safe to draw inside, but we'll see
     // Use a priority queue for O(mlogn) runtime because m = O(mn)
-    public static void Dijkstra(PathGraph graph, PathGraphNode source=null)
+    public static IEnumerator Dijkstra(PathGraph graph, PathGraphNode source=null)
     {
         // if no source specified, set to root
         source ??= graph.root;
@@ -108,10 +109,13 @@ internal class Algorithms
 
             dist[nextEdge.to] = dist[nextEdge.from] + distanceAcrossCut;
 
-            // distance is set, this is shortest path, so draw line
-            DrawLineWithColor(nextEdge.from.bounds.center, nextEdge.to.bounds.center, Color.yellow);
-
+            // mark this node explored, no need to look at it again by correctness of Dijkstra
             explored.Add(nextEdge.to);
+
+            // distance is set, this is shortest path, so draw line
+            graph.dijkstraLinePoints.Add((nextEdge.from.bounds.center, nextEdge.to.bounds.center));
+
+            yield return new WaitForSeconds(0.02f);
         }
     }
 
@@ -148,7 +152,7 @@ internal class Algorithms
                 {
                     dist[edge.to] = dist[edge.from] + edge.weight;
                     pred[edge.to] = edge.from;
-                    DrawLineWithColor(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
+                    Debug.DrawLine(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
                 }
             }
         }
@@ -168,6 +172,7 @@ internal class Algorithms
     /// <param name="graph"></param>
     /// <param name="source"></param>
     /// <returns></returns>
+    /// TODO: Implement using Queue? That's what wikipedia does...
     public static Dictionary<PathGraphNode, double> BellmanFordMoore(PathGraph graph, PathGraphNode source = null)
     {
         // if no source specified, set to root
@@ -221,7 +226,7 @@ internal class Algorithms
                 {
                     dist[edge.to] = dist[edge.from] + edge.weight;
                     pred[edge.to] = edge.from;
-                    DrawLineWithColor(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
+                    Debug.DrawLine(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
 
                     updatedNodes.Add(edge.to);
                 }

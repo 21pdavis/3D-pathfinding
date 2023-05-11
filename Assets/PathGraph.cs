@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using UnityEngine;
 using static Algorithms;
 
 public class PathGraph
@@ -10,6 +10,9 @@ public class PathGraph
     public bool initialized { private set; get; }
     public int nodeCount { private set; get; } = 1; // in the current version of the graph, this number should come out to 1337
     public int edgeCount { private set; get; }
+
+
+    public List<(Vector3 from, Vector3 to)> dijkstraLinePoints { set; get; } = new();
 
     // initialize PathGraph using a level-order traversal of the given octree
     public static PathGraph FromOctree(Octree octree)

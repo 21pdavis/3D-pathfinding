@@ -1,7 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using static Functional;
 using static Algorithms;
+// ReSharper disable All
 
 [System.Serializable]
 public class CreateGraph : MonoBehaviour
@@ -17,6 +21,27 @@ public class CreateGraph : MonoBehaviour
     public bool showBellmanFordMoore;
     public bool showColliders;
 
+    private IEnumerator dijkstraCoroutine = null;
+    private Color dijkstraColor = Color.yellow;
+
+    private IEnumerator DrawLines()
+    {
+        List<List<(Vector3 from, Vector3 to)>> linePointLists = new();
+        linePointLists.Add(pathGraph.dijkstraLinePoints);
+
+        while (true)
+        {
+            foreach (var list in linePointLists)
+            {
+                foreach ((Vector3 from, Vector3 to) in list)
+                {
+                    Debug.DrawLine(from, to, dijkstraColor);
+                }
+            }
+            yield return null;
+        }
+    }
+
     // Start is called before the first frame update
     private void Start()
     {
@@ -24,33 +49,38 @@ public class CreateGraph : MonoBehaviour
         octree = new Octree(worldObjects, nodeMinSize);
         pathGraph = PathGraph.FromOctree(octree);
         pathGraph.ConnectGraph();
+        StartCoroutine(DrawLines());
     }
 
-    private void OnDrawGizmos()
+    private void Update()
     {
         if (!(octree != null && pathGraph.initialized)) return;
 
         if (showBoxes)
         {
-            DrawWithColor(pathGraph.root.Draw, Color.green);
+            //DrawWithColor(pathGraph.root.Draw, Color.green);
+            pathGraph.root.Draw(Color.green);
         }
 
         if (showBFS)
         {
-            DrawWithColor(() =>
+            BFS(pathGraph.root, (prev, next, i, len) =>
             {
-                BFS(pathGraph.root, (prev, next, i, len) =>
-                {
-                    Gizmos.DrawLine(prev.bounds.center, next.bounds.center);
-                });
-            }, Color.red);
+                Debug.DrawLine(prev.bounds.center, next.bounds.center, Color.red);
+            });
         }
 
-        if (showDijkstra)
+        if (showDijkstra && dijkstraCoroutine == null)
         {
-            Dijkstra(pathGraph);
+            dijkstraCoroutine = Dijkstra(pathGraph);
+            StartCoroutine(dijkstraCoroutine);
         }
-
+        else if (!showDijkstra && dijkstraCoroutine != null)
+        {
+            StopCoroutine(dijkstraCoroutine);
+            pathGraph.dijkstraLinePoints.Clear();
+            dijkstraCoroutine = null;
+        }
 
         Dictionary<PathGraphNode, double> distUnoptimized = null;
         Dictionary<PathGraphNode, double> distOptimized = null;

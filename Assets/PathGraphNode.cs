@@ -21,7 +21,7 @@ public class PathGraphNode
         return ret;
     }
 
-    public void Draw()
+    public void Draw(Color color)
     {
         Algorithms.BFS(this, (prev, next, i, len) =>
         {

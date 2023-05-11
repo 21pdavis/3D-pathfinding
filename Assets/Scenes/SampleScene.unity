@@ -905,6 +905,7 @@ MonoBehaviour:
   showBoxes: 0
   showBFS: 0
   showDijkstra: 0
+  showBellmanFord: 0
   showBellmanFordMoore: 0
   showColliders: 0
 --- !u!4 &2030068492
