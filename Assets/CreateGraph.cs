@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 using static Functional;
 using static Algorithms;
-// ReSharper disable All
 
 [System.Serializable]
 public class CreateGraph : MonoBehaviour

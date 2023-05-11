@@ -1,26 +1,7 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
+﻿using UnityEngine;
 
 internal class Functional
 {
-    //private static void ExecAndTempColor(Action drawFunc, Color color)
-    //{
-    //    if (!color.Equals(Gizmos.color))
-    //    {
-    //        Color prevColor = Gizmos.color;
-    //        Gizmos.color = color;
-
-    //        drawFunc();
-
-    //        Gizmos.color = prevColor;
-    //    }
-    //    else
-    //    {
-    //        drawFunc();
-    //    }
-    //}
-
     public static void DrawWireCubeWithColor(Bounds bounds, Color color)
     {
         // https://answers.unity.com/questions/29797/how-to-get-8-vertices-from-bounds-properties.html
@@ -53,19 +34,4 @@ internal class Functional
         Debug.DrawLine(boundPoint8, boundPoint5, color);
         Debug.DrawLine(boundPoint4, boundPoint1, color);
     }
-
-    //public static void DrawWithColor(Action drawFunc, Color color)
-    //{
-    //    ExecAndTempColor(drawFunc, color);
-    //}
-
-    //public static void DrawWireCubeWithColor(Bounds objBounds, Color color)
-    //{
-    //    ExecAndTempColor(() => { Gizmos.DrawWireCube(objBounds.center, objBounds.size); }, color);
-    //}
-
-    //public static void DrawLineWithColor(Vector3 vec1, Vector3 vec2, Color color)
-    //{
-    //    ExecAndTempColor(() => { Debug.DrawLine(vec1, vec2, color); }, color);
-    //}
 }
