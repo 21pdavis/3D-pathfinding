@@ -121,7 +121,7 @@ internal class Algorithms
     /// </summary>
     /// <param name="graph"></param>
     /// TODO: Can probably optimize this to track cutset better...? Track In-Degree?
-    public static Dictionary<PathGraphNode, double> BellmanFordMoore(PathGraph graph, PathGraphNode source=null)
+    public static Dictionary<PathGraphNode, double> BellmanFord(PathGraph graph, PathGraphNode source=null)
     {
         // if no source specified, set to root
         source ??= graph.root;
@@ -168,7 +168,7 @@ internal class Algorithms
     /// <param name="graph"></param>
     /// <param name="source"></param>
     /// <returns></returns>
-    public static Dictionary<PathGraphNode, double> OptimizedBellmanFordMoore(PathGraph graph, PathGraphNode source = null)
+    public static Dictionary<PathGraphNode, double> BellmanFordMoore(PathGraph graph, PathGraphNode source = null)
     {
         // if no source specified, set to root
         source ??= graph.root;

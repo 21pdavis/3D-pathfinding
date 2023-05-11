@@ -13,8 +13,8 @@ public class CreateGraph : MonoBehaviour
     public bool showBoxes;
     public bool showBFS;
     public bool showDijkstra;
+    public bool showBellmanFord;
     public bool showBellmanFordMoore;
-    public bool showOptimizedBellmanFordMoore;
     public bool showColliders;
 
     // Start is called before the first frame update
@@ -54,14 +54,14 @@ public class CreateGraph : MonoBehaviour
 
         Dictionary<PathGraphNode, double> distUnoptimized = null;
         Dictionary<PathGraphNode, double> distOptimized = null;
-        if (showBellmanFordMoore)
+        if (showBellmanFord)
         {
-            distUnoptimized = BellmanFordMoore(pathGraph);
+            distUnoptimized = BellmanFord(pathGraph);
         }
 
-        if (showOptimizedBellmanFordMoore)
+        if (showBellmanFordMoore)
         {
-            distOptimized = OptimizedBellmanFordMoore(pathGraph);
+            distOptimized = BellmanFordMoore(pathGraph);
         }
 
         if (showColliders)
