@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+
 using static Algorithms;
 
 public class PathGraph
@@ -11,8 +12,15 @@ public class PathGraph
     public int nodeCount { private set; get; } = 1; // in the current version of the graph, this number should come out to 1337
     public int edgeCount { private set; get; }
 
+    public List<(Vector3 from, Vector3 to)> dijkstraLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> bfsLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> bellmanFordLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> bellmanFordMooreLines { set; get; } = new();
 
-    public List<(Vector3 from, Vector3 to)> dijkstraLinePoints { set; get; } = new();
+    public Color bfsColor { set; get; } = Color.red;
+    public Color dijkstraColor { set; get; } = Color.yellow;
+    public Color bellmanFordColor { set; get; } = new(1, 0, 1);
+    public Color bellmanFordMooreColor { set; get; } = Color.cyan;
 
     // initialize PathGraph using a level-order traversal of the given octree
     public static PathGraph FromOctree(Octree octree)

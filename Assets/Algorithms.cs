@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-using static Functional;
-
 internal class Algorithms
 {
     // need to prevent from revisiting nodeSet
@@ -52,6 +50,31 @@ internal class Algorithms
         }
     }
 
+    public static IEnumerator CoroutineBFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode, List<PathGraphNode>, int> visitFunc)
+    {
+        Queue<PathGraphNode> queue = new();
+        queue.Enqueue(root);
+        HashSet<PathGraphNode> visited = new();
+
+        int visitedCount = 0;
+        while (queue.Count > 0)
+        {
+            PathGraphNode prev = queue.Dequeue();
+
+            List<PathGraphNode> notVisited = prev.edges.Where(edge => !visited.Contains(edge.to)).Select(e => e.to).ToList();
+            for (int i = 0; i < notVisited.Count; i++)
+            {
+                visitedCount++;
+                queue.Enqueue(notVisited[i]);
+                visitFunc(prev, notVisited[i], notVisited, i);
+            }
+
+            visited.Add(prev);
+
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
     // Should I draw inside this algorithm or use a visitFunc? Probably safe to draw inside, but we'll see
     // Use a priority queue for O(mlogn) runtime because m = O(mn)
     public static IEnumerator Dijkstra(PathGraph graph, PathGraphNode source=null)
@@ -80,12 +103,12 @@ internal class Algorithms
         }
 
         int repeatCount = 0;
-        // Not positive that this condition works
-        while (explored.Count < graph.nodeCount)
+        // Overall O(mlogn)
+        while (explored.Count < graph.nodeCount) // O(n)
         {
             // Select a to v not in S with at least one edge from S for which d'(v) = min_{e=(u,v):u in S}(dist[u] + e.weight) is as small as possible
-            double distanceAcrossCut = prio.PriorityPeek();
-            Edge nextEdge = prio.Dequeue();
+            double distanceAcrossCut = prio.PriorityPeek(); // O(1)
+            Edge nextEdge = prio.Dequeue(); // O(4logn/log4) = O(logn)
 
             // checking to see how redundant this is...
             // The answer was fairly redundant, repeatCount came out to be ~3000, which is honestly less than I expected, though still not great
@@ -109,11 +132,11 @@ internal class Algorithms
 
             dist[nextEdge.to] = dist[nextEdge.from] + distanceAcrossCut;
 
-            // mark this node explored, no need to look at it again by correctness of Dijkstra
+            // mark this node explored, no need to look at it again by correctness of Dijkstra on positive edge weight directed graph
             explored.Add(nextEdge.to);
 
             // distance is set, this is shortest path, so draw line
-            graph.dijkstraLinePoints.Add((nextEdge.from.bounds.center, nextEdge.to.bounds.center));
+            graph.dijkstraLines.Add((nextEdge.from.bounds.center, nextEdge.to.bounds.center));
 
             yield return new WaitForSeconds(0.02f);
         }
@@ -124,8 +147,7 @@ internal class Algorithms
     /// modified to be single source all destination instead of single sink
     /// </summary>
     /// <param name="graph"></param>
-    /// TODO: Can probably optimize this to track cutset better...? Track In-Degree?
-    public static Dictionary<PathGraphNode, double> BellmanFord(PathGraph graph, PathGraphNode source=null)
+    public static IEnumerator BellmanFord(PathGraph graph, PathGraphNode source=null)
     {
         // if no source specified, set to root
         source ??= graph.root;
@@ -144,6 +166,7 @@ internal class Algorithms
         // edge relaxation
         // Interesting observation: BellmanFord grows outwardly closer to how BFS works *because of the order of the edge set*,
         // but Dijkstra's is more unpredictable. It is not necessarily like DFS, but it will just grab the next closest edge
+        // The book says normal BF is 
         for (int i = 0; i < dist.Count - 1; i++)
         {
             foreach (Edge edge in graph.edgeSet)
@@ -152,15 +175,15 @@ internal class Algorithms
                 {
                     dist[edge.to] = dist[edge.from] + edge.weight;
                     pred[edge.to] = edge.from;
-                    Debug.DrawLine(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
+                    graph.bellmanFordLines.Add((edge.from.bounds.center, edge.to.bounds.center));
                 }
+                yield return new WaitForSeconds(0.25f);
             }
+
         }
 
         // observation: edgeSet.Count = 4*(nodeSet.Count - 1), not sure if that's noteworthy 
         Debug.Log($"dist.Count is {dist.Count}");
-
-        return dist;
     }
 
     /// <summary>
@@ -173,7 +196,7 @@ internal class Algorithms
     /// <param name="source"></param>
     /// <returns></returns>
     /// TODO: Implement using Queue? That's what wikipedia does...
-    public static Dictionary<PathGraphNode, double> BellmanFordMoore(PathGraph graph, PathGraphNode source = null)
+    public static IEnumerator BellmanFordMoore(PathGraph graph, PathGraphNode source = null)
     {
         // if no source specified, set to root
         source ??= graph.root;
@@ -226,7 +249,7 @@ internal class Algorithms
                 {
                     dist[edge.to] = dist[edge.from] + edge.weight;
                     pred[edge.to] = edge.from;
-                    Debug.DrawLine(edge.from.bounds.center, edge.to.bounds.center, Color.cyan);
+                    graph.bellmanFordMooreLines.Add((edge.from.bounds.center, edge.to.bounds.center));
 
                     updatedNodes.Add(edge.to);
                 }
@@ -242,15 +265,15 @@ internal class Algorithms
             }
 
             edgesFromUpdatedNodes = edgesFromUpdatedNodes.Where(e => updatedNodes.Contains(e.from)).ToHashSet();
+
+            yield return new WaitForSeconds(0.25f);
         }
 
-        Debug.Log($"Bellman-Ford Finished after {numberOfIterations} iterations");
+        Debug.Log($"Bellman-Ford-Moore Finished after {numberOfIterations} iterations");
 
         int updatedSumFlooredAverage = updatedCountSum / numberOfIterations;
-        Debug.Log($"Average number of nodes checked per iteration was {updatedSumFlooredAverage}, which is an improvement over {graph.edgeCount}");
-        Debug.Log($"Maximum number of nodes checked in some iteration was {updatedCountMax}, which is an improvement over {graph.edgeCount}");
-
-        return dist;
+        Debug.Log($"Average number of edges checked per iteration was {updatedSumFlooredAverage}, which is an improvement over {graph.edgeCount}");
+        Debug.Log($"Maximum number of edges checked in some iteration was {updatedCountMax}, which is an improvement over {graph.edgeCount}");
     }
 
     /// <summary>

@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using static Functional;
 using static Algorithms;
@@ -21,21 +19,28 @@ public class CreateGraph : MonoBehaviour
     public bool showBellmanFordMoore;
     public bool showColliders;
 
+    private IEnumerator bfsCoroutine = null;
     private IEnumerator dijkstraCoroutine = null;
-    private Color dijkstraColor = Color.yellow;
+    private IEnumerator bellmanFordCoroutine = null;
+    private IEnumerator bellmanFordMooreCoroutine = null;
 
     private IEnumerator DrawLines()
     {
-        List<List<(Vector3 from, Vector3 to)>> linePointLists = new();
-        linePointLists.Add(pathGraph.dijkstraLinePoints);
+        Dictionary<List<(Vector3 from, Vector3 to)>, Color> linePointLists = new()
+        {
+            { pathGraph.bfsLines, pathGraph.bfsColor },
+            { pathGraph.dijkstraLines, pathGraph.dijkstraColor },
+            { pathGraph.bellmanFordLines, pathGraph.bellmanFordColor },
+            { pathGraph.bellmanFordMooreLines, pathGraph.bellmanFordMooreColor }
+        };
 
         while (true)
         {
-            foreach (var list in linePointLists)
+            foreach (var kv in linePointLists)
             {
-                foreach ((Vector3 from, Vector3 to) in list)
+                foreach ((Vector3 from, Vector3 to) in kv.Key)
                 {
-                    Debug.DrawLine(from, to, dijkstraColor);
+                    Debug.DrawLine(from, to, kv.Value);
                 }
             }
             yield return null;
@@ -62,12 +67,20 @@ public class CreateGraph : MonoBehaviour
             pathGraph.root.Draw(Color.green);
         }
 
-        if (showBFS)
+        if (showBFS && bfsCoroutine == null)
         {
-            BFS(pathGraph.root, (prev, next, i, len) =>
+            bfsCoroutine = CoroutineBFS(pathGraph.root, (prev, next, i, len) =>
             {
-                Debug.DrawLine(prev.bounds.center, next.bounds.center, Color.red);
+                pathGraph.bfsLines.Add((prev.bounds.center, next.bounds.center));
+                //Debug.DrawLine(prev.bounds.center, next.bounds.center, Color.red);
             });
+            StartCoroutine(bfsCoroutine);
+        }
+        else if (!showBFS && bfsCoroutine != null)
+        {
+            StopCoroutine(bfsCoroutine);
+            pathGraph.bfsLines.Clear();
+            bfsCoroutine = null;
         }
 
         if (showDijkstra && dijkstraCoroutine == null)
@@ -78,20 +91,32 @@ public class CreateGraph : MonoBehaviour
         else if (!showDijkstra && dijkstraCoroutine != null)
         {
             StopCoroutine(dijkstraCoroutine);
-            pathGraph.dijkstraLinePoints.Clear();
+            pathGraph.dijkstraLines.Clear();
             dijkstraCoroutine = null;
         }
 
-        Dictionary<PathGraphNode, double> distUnoptimized = null;
-        Dictionary<PathGraphNode, double> distOptimized = null;
-        if (showBellmanFord)
+        if (showBellmanFord && bellmanFordCoroutine == null)
         {
-            distUnoptimized = BellmanFord(pathGraph);
+            bellmanFordCoroutine = BellmanFord(pathGraph);
+            StartCoroutine(bellmanFordCoroutine);
+        }
+        else if (!showBellmanFord && bellmanFordCoroutine != null)
+        {
+            StopCoroutine(bellmanFordCoroutine);
+            pathGraph.bellmanFordLines.Clear();
+            bellmanFordCoroutine = null;
         }
 
-        if (showBellmanFordMoore)
+        if (showBellmanFordMoore && bellmanFordMooreCoroutine == null)
         {
-            distOptimized = BellmanFordMoore(pathGraph);
+            bellmanFordMooreCoroutine = BellmanFordMoore(pathGraph);
+            StartCoroutine(bellmanFordMooreCoroutine);
+        }
+        else if (!showBellmanFordMoore && bellmanFordMooreCoroutine != null)
+        {
+            StopCoroutine(bellmanFordMooreCoroutine);
+            pathGraph.bellmanFordMooreLines.Clear();
+            bellmanFordMooreCoroutine = null;
         }
 
         if (showColliders)
