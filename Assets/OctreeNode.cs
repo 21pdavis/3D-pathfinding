@@ -6,7 +6,7 @@ public class OctreeNode
 {
     // children was originally "children", but moving away from octree representation
     public OctreeNode[] children;
-    public Bounds bounds { get; }
+    public Bounds Bounds { get; }
 
     private Bounds[] childBounds;
     private float minSize;
@@ -18,7 +18,7 @@ public class OctreeNode
     {
         children = new OctreeNode[8];
 
-        this.bounds = bounds;
+        this.Bounds = bounds;
         this.minSize = minSize;
 
         // This value represents one fourth of any given side of the cube xx------ 
@@ -52,7 +52,7 @@ public class OctreeNode
 
     public void DivideAndAdd(GameObject wo)
     {
-        if (bounds.size.y <= minSize)
+        if (Bounds.size.y <= minSize)
         {
             return;
         }
@@ -78,7 +78,7 @@ public class OctreeNode
 
     public void Draw()
     {
-        DrawWireCubeWithColor(bounds, containsPather ? Color.yellow : Color.green);
+        DrawWireCubeWithColor(Bounds, containsPather ? Color.yellow : Color.green);
         if (children != null)
         {
             for (int i = 0; i < 8; i++)

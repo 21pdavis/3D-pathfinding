@@ -1,37 +1,38 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 using static Functional;
 using static Algorithms;
 
-[System.Serializable]
+[Serializable]
 public class CreateGraph : MonoBehaviour
 {
     public GameObject[] worldObjects;
-    public int nodeMinSize = 1;
-    public Octree octree;
-    public PathGraph pathGraph;
-    public bool showBoxes;
-    public bool showBFS;
-    public bool showDijkstra;
-    public bool showBellmanFord;
-    public bool showBellmanFordMoore;
-    public bool showColliders;
+    public int NodeMinSize { set; get; }  = 1;
+    public Octree Octree { private set; get; }
+    public PathGraph PathGraph { private set; get; }
 
-    private IEnumerator bfsCoroutine = null;
-    private IEnumerator dijkstraCoroutine = null;
-    private IEnumerator bellmanFordCoroutine = null;
-    private IEnumerator bellmanFordMooreCoroutine = null;
+    public bool showBoxes;
+    public bool showBfs = false;
+    public bool showDijkstra = false;
+    public bool showBellmanFord = false;
+    public bool showBellmanFordMoore = false;
+    public bool showColliders = false;
+
+    private IEnumerator bfsCoroutine;
+    private IEnumerator dijkstraCoroutine;
+    private IEnumerator bellmanFordCoroutine;
+    private IEnumerator bellmanFordMooreCoroutine;
 
     private IEnumerator DrawLines()
     {
         Dictionary<List<(Vector3 from, Vector3 to)>, Color> linePointLists = new()
         {
-            { pathGraph.bfsLines, pathGraph.bfsColor },
-            { pathGraph.dijkstraLines, pathGraph.dijkstraColor },
-            { pathGraph.bellmanFordLines, pathGraph.bellmanFordColor },
-            { pathGraph.bellmanFordMooreLines, pathGraph.bellmanFordMooreColor }
+            { PathGraph.BfsLines, PathGraph.BfsColor },
+            { PathGraph.DijkstraLines, PathGraph.DijkstraColor },
+            { PathGraph.BellmanFordLines, PathGraph.BellmanFordColor },
+            { PathGraph.BellmanFordMooreLines, PathGraph.BellmanFordMooreColor }
         };
 
         while (true)
@@ -43,6 +44,7 @@ public class CreateGraph : MonoBehaviour
                     Debug.DrawLine(from, to, kv.Value);
                 }
             }
+            // TODO: Could refactor this to be more proper use of return, but it works so I don't care for now
             yield return null;
         }
     }
@@ -51,71 +53,71 @@ public class CreateGraph : MonoBehaviour
     private void Start()
     {
         // Question: How is worldObjects populated? A: in unity
-        octree = new Octree(worldObjects, nodeMinSize);
-        pathGraph = PathGraph.FromOctree(octree);
-        pathGraph.ConnectGraph();
+        Octree = new Octree(worldObjects, NodeMinSize);
+        PathGraph = PathGraph.FromOctree(Octree);
+        PathGraph.ConnectGraph();
         StartCoroutine(DrawLines());
     }
 
     private void Update()
     {
-        if (!(octree != null && pathGraph.initialized)) return;
+        if (!(Octree != null && PathGraph.Initialized)) return;
 
         if (showBoxes)
         {
             //DrawWithColor(pathGraph.root.Draw, Color.green);
-            pathGraph.root.Draw(Color.green);
+            PathGraph.Root.Draw(Color.green);
         }
 
-        if (showBFS && bfsCoroutine == null)
+        if (showBfs && bfsCoroutine == null)
         {
-            bfsCoroutine = CoroutineBFS(pathGraph.root, (prev, next, i, len) =>
+            bfsCoroutine = CoroutineBfs(PathGraph.Root, (prev, next, _, _) =>
             {
-                pathGraph.bfsLines.Add((prev.bounds.center, next.bounds.center));
+                PathGraph.BfsLines.Add((prev.Bounds.center, next.Bounds.center));
                 //Debug.DrawLine(prev.bounds.center, next.bounds.center, Color.red);
             });
             StartCoroutine(bfsCoroutine);
         }
-        else if (!showBFS && bfsCoroutine != null)
+        else if (!showBfs && bfsCoroutine != null)
         {
             StopCoroutine(bfsCoroutine);
-            pathGraph.bfsLines.Clear();
+            PathGraph.BfsLines.Clear();
             bfsCoroutine = null;
         }
 
         if (showDijkstra && dijkstraCoroutine == null)
         {
-            dijkstraCoroutine = Dijkstra(pathGraph);
+            dijkstraCoroutine = Dijkstra(PathGraph);
             StartCoroutine(dijkstraCoroutine);
         }
         else if (!showDijkstra && dijkstraCoroutine != null)
         {
             StopCoroutine(dijkstraCoroutine);
-            pathGraph.dijkstraLines.Clear();
+            PathGraph.DijkstraLines.Clear();
             dijkstraCoroutine = null;
         }
 
         if (showBellmanFord && bellmanFordCoroutine == null)
         {
-            bellmanFordCoroutine = BellmanFord(pathGraph);
+            bellmanFordCoroutine = BellmanFord(PathGraph);
             StartCoroutine(bellmanFordCoroutine);
         }
         else if (!showBellmanFord && bellmanFordCoroutine != null)
         {
             StopCoroutine(bellmanFordCoroutine);
-            pathGraph.bellmanFordLines.Clear();
+            PathGraph.BellmanFordLines.Clear();
             bellmanFordCoroutine = null;
         }
 
         if (showBellmanFordMoore && bellmanFordMooreCoroutine == null)
         {
-            bellmanFordMooreCoroutine = BellmanFordMoore(pathGraph);
+            bellmanFordMooreCoroutine = BellmanFordMoore(PathGraph);
             StartCoroutine(bellmanFordMooreCoroutine);
         }
         else if (!showBellmanFordMoore && bellmanFordMooreCoroutine != null)
         {
             StopCoroutine(bellmanFordMooreCoroutine);
-            pathGraph.bellmanFordMooreLines.Clear();
+            PathGraph.BellmanFordMooreLines.Clear();
             bellmanFordMooreCoroutine = null;
         }
 

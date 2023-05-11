@@ -37,7 +37,7 @@ internal sealed class PriorityQueueDebugView<TElement, TPriority> {
     }
 
     public PriorityQueueDebugView( PriorityQueue<TElement, TPriority>.UnorderedItemsCollection collection ) =>
-        _queue = collection?._queue ?? throw new System.ArgumentNullException( nameof(collection) );
+        _queue = collection?.queue ?? throw new System.ArgumentNullException( nameof(collection) );
 }
 
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
@@ -93,8 +93,8 @@ internal static class EnumerableHelpers {
         } else {
             using ( IEnumerator<T> en = source.GetEnumerator() ) {
                 if ( en.MoveNext() ) {
-                    const int DefaultCapacity = 4;
-                    T[] arr = new T[DefaultCapacity];
+                    const int defaultCapacity = 4;
+                    T[] arr = new T[defaultCapacity];
                     arr[0] = en.Current;
                     int count = 1;
 
@@ -598,10 +598,10 @@ public class PriorityQueue<TElement, TPriority> {
     private void Grow( int minCapacity ) {
         Debug.Assert( _nodes.Length < minCapacity );
 
-        const int GrowFactor = 2;
-        const int MinimumGrow = 4;
+        const int growFactor = 2;
+        const int minimumGrow = 4;
 
-        int newcapacity = GrowFactor * _nodes.Length;
+        int newcapacity = growFactor * _nodes.Length;
 
         // Allow the queue to grow to maximum possible capacity (~2G elements) before encountering overflow.
         // Note that this check works even when _nodes.Length overflowed thanks to the (uint) cast
@@ -610,7 +610,7 @@ public class PriorityQueue<TElement, TPriority> {
         }
 
         // Ensure minimum growth is respected.
-        newcapacity = Math.Max( newcapacity, _nodes.Length + MinimumGrow );
+        newcapacity = Math.Max( newcapacity, _nodes.Length + minimumGrow );
 
         // If the computed capacity is still less than specified, set to the original argument.
         // Capacities exceeding Array.MaxLength will be surfaced as OutOfMemoryException by Array.Resize.
@@ -843,15 +843,15 @@ public class PriorityQueue<TElement, TPriority> {
     [DebuggerTypeProxy( typeof(PriorityQueueDebugView<,>) )]
     public sealed class UnorderedItemsCollection : IReadOnlyCollection<(TElement Element, TPriority Priority)>,
                                                    ICollection {
-        internal readonly PriorityQueue<TElement, TPriority> _queue;
+        internal readonly PriorityQueue<TElement, TPriority> queue;
 
-        internal UnorderedItemsCollection( PriorityQueue<TElement, TPriority> queue ) => _queue = queue;
+        internal UnorderedItemsCollection( PriorityQueue<TElement, TPriority> queue ) => this.queue = queue;
 
         /// <summary>
         ///     Returns an enumerator that iterates through the <see cref="UnorderedItems" />.
         /// </summary>
         /// <returns>An <see cref="Enumerator" /> for the <see cref="UnorderedItems" />.</returns>
-        public Enumerator GetEnumerator() => new( _queue );
+        public Enumerator GetEnumerator() => new( queue );
 
         object ICollection.SyncRoot => this;
         bool ICollection.IsSynchronized => false;
@@ -872,18 +872,18 @@ public class PriorityQueue<TElement, TPriority> {
                                                        SR.ArgumentOutOfRange_IndexMustBeLessOrEqual );
             }
 
-            if ( array.Length - index < _queue._size ) {
+            if ( array.Length - index < queue._size ) {
                 throw new ArgumentException( SR.Argument_InvalidOffLen );
             }
 
             try {
-                Array.Copy( _queue._nodes, 0, array, index, _queue._size );
+                Array.Copy( queue._nodes, 0, array, index, queue._size );
             } catch ( ArrayTypeMismatchException ) {
                 throw new ArgumentException( SR.Argument_InvalidArrayType, nameof(array) );
             }
         }
 
-        public int Count => _queue._size;
+        public int Count => queue._size;
 
         IEnumerator<(TElement Element, TPriority Priority)> IEnumerable<(TElement Element, TPriority Priority)>.
             GetEnumerator() => GetEnumerator();

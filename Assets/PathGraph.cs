@@ -5,22 +5,22 @@ using static Algorithms;
 
 public class PathGraph
 {
-    public PathGraphNode root { private set; get; }
-    public HashSet<PathGraphNode> nodeSet { private set; get; } = new();
-    public HashSet<Edge> edgeSet { private set; get; } = new();
-    public bool initialized { private set; get; }
-    public int nodeCount { private set; get; } = 1; // in the current version of the graph, this number should come out to 1337
-    public int edgeCount { private set; get; }
+    public PathGraphNode Root { private set; get; }
+    public HashSet<PathGraphNode> NodeSet { private set; get; } = new();
+    public HashSet<Edge> EdgeSet { private set; get; } = new();
+    public bool Initialized { private set; get; }
+    public int NodeCount { private set; get; } = 1; // in the current version of the graph, this number should come out to 1337
+    public int EdgeCount { private set; get; }
 
-    public List<(Vector3 from, Vector3 to)> dijkstraLines { set; get; } = new();
-    public List<(Vector3 from, Vector3 to)> bfsLines { set; get; } = new();
-    public List<(Vector3 from, Vector3 to)> bellmanFordLines { set; get; } = new();
-    public List<(Vector3 from, Vector3 to)> bellmanFordMooreLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> DijkstraLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> BfsLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> BellmanFordLines { set; get; } = new();
+    public List<(Vector3 from, Vector3 to)> BellmanFordMooreLines { set; get; } = new();
 
-    public Color bfsColor { set; get; } = Color.red;
-    public Color dijkstraColor { set; get; } = Color.yellow;
-    public Color bellmanFordColor { set; get; } = new(1, 0, 1);
-    public Color bellmanFordMooreColor { set; get; } = Color.cyan;
+    public Color BfsColor { set; get; } = Color.red;
+    public Color DijkstraColor { set; get; } = Color.yellow;
+    public Color BellmanFordColor { set; get; } = new(1, 0, 1);
+    public Color BellmanFordMooreColor { set; get; } = Color.cyan;
 
     // initialize PathGraph using a level-order traversal of the given octree
     public static PathGraph FromOctree(Octree octree)
@@ -32,14 +32,14 @@ public class PathGraph
         OctreeNode octreePrev = null;
         PathGraphNode pathRoot = null;
 
-        BFS(octree.root, (prev, next) =>
+        Bfs(octree.Root, (prev, next) =>
         {
             if (octreePrev != prev)
             {
-                if (prev == octree.root)
+                if (prev == octree.Root)
                 {
                     pathRoot = PathGraphNode.FromOctreeNode(prev);
-                    ret.nodeSet.Add(pathRoot);
+                    ret.NodeSet.Add(pathRoot);
                     queue.Enqueue(pathRoot);
                 }
                 prevPathGraphNode = queue.Dequeue();
@@ -51,17 +51,17 @@ public class PathGraph
                 queue.Enqueue(newNode);
 
             Edge newEdge = new(prevPathGraphNode, newNode, Dist3D(prevPathGraphNode, newNode));
-            prevPathGraphNode?.edges.Add(newEdge);
+            prevPathGraphNode?.Edges.Add(newEdge);
 
-            ret.nodeSet.Add(newNode);
-            ret.edgeSet.Add(newEdge);
+            ret.NodeSet.Add(newNode);
+            ret.EdgeSet.Add(newEdge);
 
-            ret.nodeCount++;
-            ret.edgeCount++;
+            ret.NodeCount++;
+            ret.EdgeCount++;
         });
 
-        ret.root = pathRoot;
-        ret.initialized = true;
+        ret.Root = pathRoot;
+        ret.Initialized = true;
 
         // nodeSet should be of size n = 1337
         // edgeSet of size n - 1 = 1336
@@ -70,10 +70,10 @@ public class PathGraph
 
     public void ConnectGraph()
     {
-        Dictionary<PathGraphNode, List<Edge>> edgeBuffer = new() { { root, new List<Edge>() } };
+        Dictionary<PathGraphNode, List<Edge>> edgeBuffer = new() { { Root, new List<Edge>() } };
 
         // connect parents
-        BFS(root, (prev, next, _, _) =>
+        Bfs(Root, (prev, next, _, _) =>
         {
             // only have to add to edge buffer in this first BFS
             edgeBuffer.Add(next, new List<Edge>());
@@ -81,7 +81,7 @@ public class PathGraph
             edgeBuffer[next].Add(new Edge(next, prev, Dist3D(next, prev)));
         });
 
-        BFS(root, (prev, next, notVisited, i) =>
+        Bfs(Root, (prev, next, notVisited, i) =>
         {
             if (i < notVisited.Count - 1)
             {
@@ -112,9 +112,9 @@ public class PathGraph
         {
             foreach (Edge edge in item.Value)
             {
-                item.Key.edges.Add(edge);
-                edgeSet.Add(edge);
-                edgeCount++;
+                item.Key.Edges.Add(edge);
+                EdgeSet.Add(edge);
+                EdgeCount++;
             }
         }
     }

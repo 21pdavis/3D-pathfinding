@@ -28,7 +28,7 @@ public class Pathing : MonoBehaviour
         }
         else if (octree == null)
         {
-            octree = createOctreeScript.octree;
+            octree = createOctreeScript.Octree;
         }
     }
 

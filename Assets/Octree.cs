@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Octree
 {
-    public OctreeNode root { private set; get; }
+    public OctreeNode Root { private set; get; }
     public bool initialized;
 
     public Octree(GameObject[] worldObjects, float minNodeSize)
@@ -25,7 +25,7 @@ public class Octree
 
         bounds.SetMinMax(bounds.center - sizeVector / 2, bounds.center + sizeVector / 2);
 
-        root = new OctreeNode(bounds, minNodeSize);
+        Root = new OctreeNode(bounds, minNodeSize);
 
         AddObjects(worldObjects);
         initialized = true;
@@ -36,7 +36,7 @@ public class Octree
         // we do a pass of subdivision for each object in the scene
         foreach (GameObject wo in worldObjects)
         {
-            root.AddObject(wo);
+            Root.AddObject(wo);
         }
     }
 

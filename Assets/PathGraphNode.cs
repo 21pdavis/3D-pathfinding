@@ -5,17 +5,17 @@ using static Functional;
 
 public class PathGraphNode
 {
-    public List<Edge> edges { set; get; }
+    public List<Edge> Edges { set; get; }
     public bool containsPather;
-    public Bounds bounds { private set; get; }
+    public Bounds Bounds { private set; get; }
 
     public static PathGraphNode FromOctreeNode(OctreeNode node)
     {
         PathGraphNode ret = new()
         {
-            edges = new List<Edge>(),
+            Edges = new List<Edge>(),
             containsPather = false,
-            bounds = new Bounds(node.bounds.center, node.bounds.size)
+            Bounds = new Bounds(node.Bounds.center, node.Bounds.size)
         };
 
         return ret;
@@ -23,9 +23,9 @@ public class PathGraphNode
 
     public void Draw(Color color)
     {
-        Algorithms.BFS(this, (prev, next, i, len) =>
+        Algorithms.Bfs(this, (prev, next, i, len) =>
         {
-            DrawWireCubeWithColor(next.bounds, next.containsPather ? Color.yellow : Color.green);
+            DrawWireCubeWithColor(next.Bounds, next.containsPather ? Color.yellow : Color.green);
         });
     }
 }

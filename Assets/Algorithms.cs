@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
-internal class Algorithms
+internal static class Algorithms
 {
     // need to prevent from revisiting nodeSet
-    public static void BFS(OctreeNode root, Action<OctreeNode, OctreeNode> visitFunc)
+    public static void Bfs(OctreeNode root, Action<OctreeNode, OctreeNode> visitFunc)
     {
         Queue<OctreeNode> queue = new();
         queue.Enqueue(root);
@@ -27,7 +29,7 @@ internal class Algorithms
         }
     }
 
-    public static void BFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode, List<PathGraphNode>, int> visitFunc)
+    public static void Bfs(PathGraphNode root, Action<PathGraphNode, PathGraphNode, List<PathGraphNode>, int> visitFunc)
     {
         Queue<PathGraphNode> queue = new();
         queue.Enqueue(root);
@@ -38,7 +40,7 @@ internal class Algorithms
         {
             PathGraphNode prev = queue.Dequeue();
 
-            List<PathGraphNode> notVisited = prev.edges.Where(edge => !visited.Contains(edge.to)).Select(e => e.to).ToList();
+            List<PathGraphNode> notVisited = prev.Edges.Where(edge => !visited.Contains(edge.To)).Select(e => e.To).ToList();
             for (int i = 0; i < notVisited.Count; i++)
             {
                 visitedCount++;
@@ -50,28 +52,28 @@ internal class Algorithms
         }
     }
 
-    public static IEnumerator CoroutineBFS(PathGraphNode root, Action<PathGraphNode, PathGraphNode, List<PathGraphNode>, int> visitFunc)
+    public static IEnumerator CoroutineBfs(PathGraphNode root, Action<PathGraphNode, PathGraphNode, List<PathGraphNode>, int> visitFunc)
     {
+        float delaySecs = 0f;
+        
         Queue<PathGraphNode> queue = new();
         queue.Enqueue(root);
         HashSet<PathGraphNode> visited = new();
 
-        int visitedCount = 0;
         while (queue.Count > 0)
         {
             PathGraphNode prev = queue.Dequeue();
 
-            List<PathGraphNode> notVisited = prev.edges.Where(edge => !visited.Contains(edge.to)).Select(e => e.to).ToList();
+            List<PathGraphNode> notVisited = prev.Edges.Where(edge => !visited.Contains(edge.To)).Select(e => e.To).ToList();
             for (int i = 0; i < notVisited.Count; i++)
             {
-                visitedCount++;
                 queue.Enqueue(notVisited[i]);
                 visitFunc(prev, notVisited[i], notVisited, i);
             }
 
             visited.Add(prev);
 
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(delaySecs);
         }
     }
 
@@ -80,7 +82,7 @@ internal class Algorithms
     public static IEnumerator Dijkstra(PathGraph graph, PathGraphNode source=null)
     {
         // if no source specified, set to root
-        source ??= graph.root;
+        source ??= graph.Root;
 
         // initialize S and d
         HashSet<PathGraphNode> explored = new() { source };
@@ -96,15 +98,15 @@ internal class Algorithms
         // TODO: MAKE SURE TO CHECK FOR REPEATED CHECKS, DON'T WANT TO RE-SET A NODE'S DIST VALUE
         PriorityQueue<Edge, double> prio = new();
 
-        foreach (Edge edge in source.edges)
+        foreach (Edge edge in source.Edges)
         {
             // enqueue with weight across cut (S, V - S)
-            prio.Enqueue(edge, edge.weight);
+            prio.Enqueue(edge, edge.Weight);
         }
 
         int repeatCount = 0;
         // Overall O(mlogn)
-        while (explored.Count < graph.nodeCount) // O(n)
+        while (explored.Count < graph.NodeCount) // O(n)
         {
             // Select a to v not in S with at least one edge from S for which d'(v) = min_{e=(u,v):u in S}(dist[u] + e.weight) is as small as possible
             double distanceAcrossCut = prio.PriorityPeek(); // O(1)
@@ -112,7 +114,7 @@ internal class Algorithms
 
             // checking to see how redundant this is...
             // The answer was fairly redundant, repeatCount came out to be ~3000, which is honestly less than I expected, though still not great
-            if (explored.Contains(nextEdge.to))
+            if (explored.Contains(nextEdge.To))
             {
                 repeatCount++;
                 continue;
@@ -125,21 +127,22 @@ internal class Algorithms
              * 3. Add next.to to explored
              */
 
-            foreach (Edge edge in nextEdge.to.edges)
+            foreach (Edge edge in nextEdge.To.Edges)
             {
-                prio.Enqueue(edge, edge.weight);
+                prio.Enqueue(edge, edge.Weight);
             }
 
-            dist[nextEdge.to] = dist[nextEdge.from] + distanceAcrossCut;
+            dist[nextEdge.To] = dist[nextEdge.From] + distanceAcrossCut;
 
             // mark this node explored, no need to look at it again by correctness of Dijkstra on positive edge weight directed graph
-            explored.Add(nextEdge.to);
+            explored.Add(nextEdge.To);
 
             // distance is set, this is shortest path, so draw line
-            graph.dijkstraLines.Add((nextEdge.from.bounds.center, nextEdge.to.bounds.center));
+            graph.DijkstraLines.Add((nextEdge.From.Bounds.center, nextEdge.To.Bounds.center));
 
             yield return new WaitForSeconds(0.02f);
         }
+        Debug.Log($"Made it to end of Dijkstra's");
     }
 
     /// <summary>
@@ -150,13 +153,13 @@ internal class Algorithms
     public static IEnumerator BellmanFord(PathGraph graph, PathGraphNode source=null)
     {
         // if no source specified, set to root
-        source ??= graph.root;
+        source ??= graph.Root;
 
         // get set of all nodeSet to which we assign distances from source
         Dictionary<PathGraphNode, double> dist = new();
         Dictionary<PathGraphNode, PathGraphNode> pred = new() { { source, null } };
 
-        foreach (PathGraphNode node in graph.nodeSet)
+        foreach (PathGraphNode node in graph.NodeSet)
         {
             dist.Add(node, int.MaxValue);
         }
@@ -169,15 +172,15 @@ internal class Algorithms
         // The book says normal BF is 
         for (int i = 0; i < dist.Count - 1; i++)
         {
-            foreach (Edge edge in graph.edgeSet)
+            foreach (Edge edge in graph.EdgeSet)
             {
-                if (dist[edge.from] + edge.weight < dist[edge.to])
+                if (dist[edge.From] + edge.Weight < dist[edge.To])
                 {
-                    dist[edge.to] = dist[edge.from] + edge.weight;
-                    pred[edge.to] = edge.from;
-                    graph.bellmanFordLines.Add((edge.from.bounds.center, edge.to.bounds.center));
+                    dist[edge.To] = dist[edge.From] + edge.Weight;
+                    pred[edge.To] = edge.From;
+                    graph.BellmanFordLines.Add((edge.From.Bounds.center, edge.To.Bounds.center));
                 }
-                yield return new WaitForSeconds(0.25f);
+                yield return new WaitForSeconds(0.02f);
             }
 
         }
@@ -199,13 +202,13 @@ internal class Algorithms
     public static IEnumerator BellmanFordMoore(PathGraph graph, PathGraphNode source = null)
     {
         // if no source specified, set to root
-        source ??= graph.root;
+        source ??= graph.Root;
 
         // get set of all nodeSet to which we assign distances from source
         Dictionary<PathGraphNode, double> dist = new();
         Dictionary<PathGraphNode, PathGraphNode> pred = new() { { source, null } };
 
-        foreach (PathGraphNode node in graph.nodeSet)
+        foreach (PathGraphNode node in graph.NodeSet)
         {
             dist.Add(node, int.MaxValue);
         }
@@ -217,7 +220,7 @@ internal class Algorithms
         HashSet<Edge> edgesFromUpdatedNodes = new();
 
         // start with edges out of node - these are the only edges that will be updated in the first iteration
-        foreach (Edge edge in source.edges)
+        foreach (Edge edge in source.Edges)
         {
             edgesFromUpdatedNodes.Add(edge);
         }
@@ -245,35 +248,35 @@ internal class Algorithms
             // here's where it starts to be a little different - we update cutSet progressively
             foreach (Edge edge in edgesFromUpdatedNodes)
             {
-                if (dist[edge.from] + edge.weight < dist[edge.to])
+                if (dist[edge.From] + edge.Weight < dist[edge.To])
                 {
-                    dist[edge.to] = dist[edge.from] + edge.weight;
-                    pred[edge.to] = edge.from;
-                    graph.bellmanFordMooreLines.Add((edge.from.bounds.center, edge.to.bounds.center));
+                    dist[edge.To] = dist[edge.From] + edge.Weight;
+                    pred[edge.To] = edge.From;
+                    graph.BellmanFordMooreLines.Add((edge.From.Bounds.center, edge.To.Bounds.center));
 
-                    updatedNodes.Add(edge.to);
+                    updatedNodes.Add(edge.To);
                 }
             }
 
             // Is this actually O(mn)?
             foreach (PathGraphNode updatedNode in updatedNodes)
             {
-                foreach (Edge edgeFromUpdatedNode in updatedNode.edges) 
+                foreach (Edge edgeFromUpdatedNode in updatedNode.Edges) 
                 {
                     edgesFromUpdatedNodes.Add(edgeFromUpdatedNode);
                 }
             }
 
-            edgesFromUpdatedNodes = edgesFromUpdatedNodes.Where(e => updatedNodes.Contains(e.from)).ToHashSet();
+            edgesFromUpdatedNodes = edgesFromUpdatedNodes.Where(e => updatedNodes.Contains(e.From)).ToHashSet();
 
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.02f);
         }
 
         Debug.Log($"Bellman-Ford-Moore Finished after {numberOfIterations} iterations");
 
         int updatedSumFlooredAverage = updatedCountSum / numberOfIterations;
-        Debug.Log($"Average number of edges checked per iteration was {updatedSumFlooredAverage}, which is an improvement over {graph.edgeCount}");
-        Debug.Log($"Maximum number of edges checked in some iteration was {updatedCountMax}, which is an improvement over {graph.edgeCount}");
+        Debug.Log($"Average number of edges checked per iteration was {updatedSumFlooredAverage}, which is an improvement over {graph.EdgeCount}");
+        Debug.Log($"Maximum number of edges checked in some iteration was {updatedCountMax}, which is an improvement over {graph.EdgeCount}");
     }
 
     /// <summary>
@@ -284,8 +287,8 @@ internal class Algorithms
     /// <returns></returns>
     public static double Dist3D(PathGraphNode n1, PathGraphNode n2)
     {
-        Vector3 n1Center = n1.bounds.center;
-        Vector3 n2Center = n2.bounds.center;
+        Vector3 n1Center = n1.Bounds.center;
+        Vector3 n2Center = n2.Bounds.center;
 
         return Math.Sqrt(
             Math.Pow(n1Center.x - n2Center.x, 2)
